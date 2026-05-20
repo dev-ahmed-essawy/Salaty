@@ -502,7 +502,15 @@
   <audio id="beep-player" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-700.wav" preload="auto"></audio>
 
   <script>
-
+document.body.addEventListener("click", () => {
+    const audio = document.getElementById("adhan-player");
+    if (audio) {
+        audio.muted = true;
+        audio.play().catch(()=>{}); // تفعيل الصوت
+        audio.pause();
+        audio.muted = false;
+    }
+}, { once: true });
 window.userInteracted = false;
 
 document.addEventListener('click', () => {
@@ -622,14 +630,20 @@ document.addEventListener('click', () => {
 
     // روابط ملفات الأذان الشاملة
     const adhanAudioFiles = {
-        makkah: { name: "الحرم المكي (علي ملا)", url: "https://www.islamcan.com/adhan/adhan1.mp3" },
-        madinah: { name: "المدينة المنورة", url: "https://www.islamcan.com/adhan/adhan3.mp3" },
+        makkah: { name: "الحرم المكي (علي ملا)", url: "https://archive.org/download/adhan_202010/adhan1.mp3"  },
+        madinah: { name: "المدينة المنورة", url: "https://archive.org/download/adhan_202010/adhan2.mp3" },
         aqsa: { name: "المسجد الأقصى", url: "https://www.islamcan.com/adhan/aqsa.mp3" },
         egypt: { name: "أذان مصر (مصطفى إسماعيل)", url: "https://www.islamcan.com/adhan/egypt.mp3" },
         abdulbasit: { name: "أذان عبد الباسط", url: "https://www.islamcan.com/adhan/abdulbasit.mp3" },
         fajr_specific: { name: "أذان الفجر (الصلاة خير من النوم)", url: "https://www.islamcan.com/adhan/adhan_fajr.mp3" },
         alafasy: { name: "أذان مشاري العفاسي", url: "https://www.islamcan.com/adhan/yusuf-islam.mp3" }, 
-        takbeer: { name: "نغمة تكبيرات فقط (هادئ)", url: "https://assets.mixkit.co/active_storage/sfx/2018/2018-700.wav" }
+        takbeer: { name: "نغمة تكبيرات فقط (هادئ)", url: "https://assets.mixkit.co/active_storage/sfx/2018/2018-700.wav" },
+        
+test: { 
+        name: "صوت تجريبي", 
+        url: "https://www.soundjay.com/buttons/sounds/button-3.mp3"
+    }
+
     };
 
     // الدول والمدن
@@ -887,38 +901,36 @@ document.addEventListener('click', () => {
     }
 
     function testAdhanVoiceSpecific(key) {
-    const adhanPlayer = document.getElementById('adhan-player');
-    const voiceId = prayerSettings[key].voice;
-    const audioURL = adhanAudioFiles[voiceId].url;
+    const audio = document.getElementById('adhan-player');
 
-    // ✅ تأكد إن المستخدم ضغط قبل كده
-    if (!window.userInteracted) {
-        showCustomModal("⚠️ تنبيه", "اضغط أي مكان في الصفحة أولاً ثم جرب الصوت");
+    // تأكد من وجود audio
+    if (!audio) {
+        alert("audio element not found");
         return;
     }
 
-    // ✅ أوقف أي صوت سابق
-    adhanPlayer.pause();
-    adhanPlayer.currentTime = 0;
+    const voice = adhanAudioFiles["makkah"].url;
 
-    // ✅ ضع الصوت
-    adhanPlayer.src = audioURL;
+    // إيقاف أي صوت
+    audio.pause();
+    audio.currentTime = 0;
 
-    // ✅ انتظار تحميل الصوت ثم تشغيله
-    adhanPlayer.oncanplaythrough = () => {
-        adhanPlayer.play().then(() => {
-            showCustomModal("✅ يتم التشغيل", `جارٍ تشغيل: ${adhanAudioFiles[voiceId].name}`);
-        }).catch(() => {
-            showCustomModal("❌ فشل التشغيل", "المتصفح منع الصوت، اضغط على الشاشة ثم حاول مرة أخرى");
-        });
-    };
+    audio.src = voice;
 
-    // ✅ fallback لو لم يتم التحميل
-    adhanPlayer.onerror = () => {
-        showCustomModal("❌ خطأ", "تعذر تحميل الصوت، جرب صوت آخر");
-    };
+    // ✅ أهم حركة
+    audio.load();
 
-    adhanPlayer.load();
+    setTimeout(() => {
+        audio.play()
+            .then(() => {
+                showCustomModal("✅ اشتغل", "الصوت اشتغل بنجاح ✅");
+            })
+            .catch(err => {
+                console.error(err);
+
+                alert("المتصفح مانع الصوت ❌\nاضغط في الشاشة الأول ثم جرب");
+            });
+    }, 300);
 }
 
 
