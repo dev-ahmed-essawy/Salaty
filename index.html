@@ -205,7 +205,7 @@
             <span class="font-bold text-slate-700 text-sm">الفجر</span>
           </div>
           <div class="flex items-center gap-4">
-            <span class="font-mono font-bold text-base text-slate-700" id="time-fajr">04:12 ص</span>
+            <span class="font-mono font-bold text-base text-slate-700" id="time-fajr">--:-- --</span>
             <button onclick="togglePrayerNotification('fajr')" class="p-2 text-slate-400 hover:text-emerald-600" id="notif-fajr">
               <i data-lucide="bell" class="w-4 h-4"></i>
             </button>
@@ -220,7 +220,7 @@
             <span class="font-bold text-slate-600 text-sm">الشروق</span>
           </div>
           <div class="flex items-center gap-4">
-            <span class="font-mono font-semibold text-slate-600 text-sm" id="time-sunrise">05:45 ص</span>
+            <span class="font-mono font-semibold text-slate-600 text-sm" id="time-sunrise">--:-- --</span>
             <div class="w-8"></div> <!-- حشو متناسق غياب الجرس للشروق -->
           </div>
         </div>
@@ -233,7 +233,7 @@
             <span class="font-bold text-slate-700 text-sm">الظهر</span>
           </div>
           <div class="flex items-center gap-4">
-            <span class="font-mono font-bold text-base text-slate-700" id="time-dhuhr">11:53 ص</span>
+            <span class="font-mono font-bold text-base text-slate-700" id="time-dhuhr">--:-- --</span>
             <button onclick="togglePrayerNotification('dhuhr')" class="p-2 text-slate-400 hover:text-emerald-600" id="notif-dhuhr">
               <i data-lucide="bell" class="w-4 h-4"></i>
             </button>
@@ -248,7 +248,7 @@
             <span class="font-bold text-slate-700 text-sm">العصر</span>
           </div>
           <div class="flex items-center gap-4">
-            <span class="font-mono font-bold text-base text-slate-700" id="time-asr">03:28 م</span>
+            <span class="font-mono font-bold text-base text-slate-700" id="time-asr">--:-- --</span>
             <button onclick="togglePrayerNotification('asr')" class="p-2 text-slate-400 hover:text-emerald-600" id="notif-asr">
               <i data-lucide="bell" class="w-4 h-4"></i>
             </button>
@@ -263,7 +263,7 @@
             <span class="font-bold text-slate-700 text-sm">المغرب</span>
           </div>
           <div class="flex items-center gap-4">
-            <span class="font-mono font-bold text-base text-slate-700" id="time-maghrib">06:01 م</span>
+            <span class="font-mono font-bold text-base text-slate-700" id="time-maghrib">--:-- --</span>
             <button onclick="togglePrayerNotification('maghrib')" class="p-2 text-slate-400 hover:text-emerald-600" id="notif-maghrib">
               <i data-lucide="bell" class="w-4 h-4"></i>
             </button>
@@ -278,7 +278,7 @@
             <span class="font-bold text-slate-700 text-sm">العشاء</span>
           </div>
           <div class="flex items-center gap-4">
-            <span class="font-mono font-bold text-base text-slate-700" id="time-isha">07:22 م</span>
+            <span class="font-mono font-bold text-base text-slate-700" id="time-isha">--:-- --</span>
             <button onclick="togglePrayerNotification('isha')" class="p-2 text-slate-400 hover:text-emerald-600" id="notif-isha">
               <i data-lucide="bell" class="w-4 h-4"></i>
             </button>
@@ -517,7 +517,7 @@
     let dstActive = false; // تفعيل التوقيت الصيفي افتراضياً (false)
     let selectedCity = 'gps'; // الافتراضي تحديد تلقائي
 
-    // إحداثيات المدن والمحافظات المصرية الكبرى
+    // إحداثيات المدن والمحافظات المصرية الكبرى بدقة متناهية
     const egyptCities = {
       cairo: { name: "القاهرة", lat: 30.0444, lon: 31.2357 },
       alexandria: { name: "الإسكندرية", lat: 31.2001, lon: 29.9187 },
@@ -535,7 +535,7 @@
       damietta: { name: "دمياط", lat: 31.4175, lon: 31.8144 },
       sohag: { name: "سوهاج", lat: 26.5570, lon: 31.6948 },
       minya: { name: "المنيا", lat: 28.0871, lon: 30.7618 },
-       Beni_suef: { name: "بني سويف", lat: 29.0744, lon: 31.0978 },
+      beni_suef: { name: "بني سويف", lat: 29.0744, lon: 31.0978 },
       qena: { name: "قنا", lat: 26.1551, lon: 32.7160 },
       hurghada: { name: "الغردقة", lat: 27.2579, lon: 33.8116 }
     };
@@ -578,7 +578,7 @@
       { text: "إنَّما الأعْمالُ بالنِّيَّاتِ، وإنَّما لِكُلِّ امْرِئٍ ما نَوَى، فمَن كانَتْ هِجْرَتُهُ إلى اللَّهِ ورَسولِهِ فهِجْرَتُهُ إلى اللَّهِ ورَسولِهِ، ومَن كانَتْ هِجْرَتُهُ لِدُنْيا يُصِيبُها، أوِ امْرَأَةٍ يَنْكِحُها، فهِجْرَتُهُ إلى ما هاجَرَ إلَيْهِ.", rawi: "رواه البخاري ومسلم" },
       { text: "مَن سَلَكَ طَرِيقًا يَلْتَمِسُ فيه عِلْمًا، سَهَّلَ اللَّهُ له به طَرِيقًا إلى الجَنَّةِ.", rawi: "رواه مسلم" },
       { text: "المُسْلِمُ مَن سَلِمَ المُسْلِمُونَ مِن لِسانِهِ ويَدِهِ، والمُهاجِرُ مَن هَجَرَ ما نَهَى اللَّهُ عنه.", rawi: "رواه البخاري" },
-      { text: "آيَةُ المُنَافِقِ ثَلَاثٌ: إذَا حَدَّثَ كَذَبَ، وإذَا وعَدَ أخْلَفَ، وإذَا اؤْتُمِنَ خَانَ.", rawi: "رواه البخاري ومسلم" },
+      { text: "آيَةُ Mُنَافِقِ ثَلَاثٌ: إذَا حَدَّثَ كَذَبَ، وإذَا وعَدَ أخْلَفَ، وإذَا اؤْتُمِنَ خَانَ.", rawi: "رواه البخاري ومسلم" },
       { text: "مَن كانَ يُؤْمِنُ باللَّهِ والْيَومِ الآخِرِ فَلْيَقُلْ خَيْرًا أوْ لِيَصْمُتْ، ومَن كانَ يُؤْمِنُ باللَّهِ والْيَومِ الآخِرِ فَلْيُكْرِمْ جارَهُ.", rawi: "رواه البخاري ومسلم" },
       { text: "الْمُؤْمِنُ القَوِيُّ، خَيْرٌ وَأَحَبُّ إلَى اللهِ مِنَ المُؤْمِنِ الضَّعِيفِ، وفي كُلٍّ خَيْرٌ احْرِصْ علَى ما يَنْفَعُكَ، وَاسْتَعِنْ باللَّهِ وَلَا تَعْجِزْ.", rawi: "رواه مسلم" }
     ];
@@ -670,7 +670,6 @@
       if (savedDST !== null) {
         dstActive = savedDST === 'true';
       } else {
-        // افتراض التوقيت الصيفي لو كنا في مايو 2026 (حيث تطبق مصر التوقيت الصيفي من أبريل لأكتوبر)
         dstActive = true; 
       }
       updateDST_UI();
@@ -680,7 +679,7 @@
       if (savedCity !== null) {
         selectedCity = savedCity;
       } else {
-        selectedCity = 'cairo'; // الافتراضي هو القاهرة لتفادي الأخطاء في البدء
+        selectedCity = 'cairo'; 
       }
       document.getElementById('city-selector').value = selectedCity;
 
@@ -697,7 +696,7 @@
         if (cityData) {
           userLatitude = cityData.lat;
           userLongitude = cityData.lon;
-          locText.textContent = `مواقيت مدينة ${cityData.name} (يدويًا) | خط عرض ${userLatitude.toFixed(2)}`;
+          locText.textContent = `مواقيت مدينة ${cityData.name} | الإحداثيات الجغرافية المعتمدة`;
           calculatePrayerTimes();
         }
       }
@@ -751,7 +750,6 @@
           },
           (error) => {
             locText.textContent = "فشل الـ GPS - تم تفعيل مواقيت القاهرة تلقائيًا";
-            // تحويل الاختيار للقاهرة
             selectedCity = 'cairo';
             document.getElementById('city-selector').value = 'cairo';
             localStorage.setItem('selected_city', 'cairo');
@@ -766,7 +764,7 @@
       }
     }
 
-    // إجبار التحديث عبر الـ GPS عند الضغط على الأيقونة الدائرية
+    // إجبار التحديث عبر الـ GPS عند الضغط على الأيقونة الجغرافية
     function forceGPSRefresh() {
       selectedCity = 'gps';
       document.getElementById('city-selector').value = 'gps';
@@ -775,62 +773,89 @@
       playBeep();
     }
 
-    // ---------------- حساب مواقيت الصلاة رياضياً بدقة ----------------
-    // حساب مواقيت الصلاة بناءً على الهيئة المصرية العامة للمساحة والمنطقة الزمنية المحددة يدوياً
+    // ---------------- حساب مواقيت الصلاة رياضياً فلكياً بدقة متناهية ----------------
     function calculatePrayerTimes() {
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth() + 1;
       const day = now.getDate();
 
-      // حساب رقم اليوم في السنة
-      const N = Math.floor(275 * month / 9) - (Math.floor((month + 9) / 12) * (1 + Math.floor((year - 4 * Math.floor(year / 4) + 2) / 3))) + day - 30;
-      
-      const L = 4.877 + 0.0172 * N;
-      const g = 6.240 + 0.0172 * N;
-      const lambda = L + 0.033 * Math.sin(g);
-      
-      const epsilon = 0.409 - 0.0001 * N;
-      const delta = Math.asin(Math.sin(epsilon) * Math.sin(lambda));
-      const E = 9.87 * Math.sin(2 * lambda) - 7.53 * Math.cos(g) - 1.5 * Math.sin(g);
+      // حساب اليوم اليولياني (Julian Date)
+      function getJulianDate(y, m, d) {
+        if (m <= 2) {
+          y -= 1;
+          m += 12;
+        }
+        let A = Math.floor(y / 100);
+        let B = 2 - A + Math.floor(A / 4);
+        let JD = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
+        return JD;
+      }
 
-      // الظهر بالتوقيت الشمسي المحلي
-      const meridian = 12 - (userLongitude / 15) + (E / 60);
-      
-      // التوقيت الزمني لمصر: التوقيت الصيفي النشط (+3) والتوقيت الشتوي القياسي (+2)
-      const timezone = dstActive ? 3 : 2; 
-      
-      const dhuhrTimeDecimal = meridian + timezone - (E / 60) + (userLongitude / 15);
-      
-      const latRad = userLatitude * Math.PI / 180;
-      const decRad = delta;
+      let JD = getJulianDate(year, month, day);
+      let D = JD - 2451545.0; // الأيام منذ حقبة J2000.0
 
+      // الإحداثيات الشمسية الفلكية الدقيقة
+      let g = (357.529 + 0.98560028 * D) % 360; // الشذوذ المتوسط
+      let q = (280.459 + 0.98564736 * D) % 360; // الطول المتوسط للشمس
+      let gRad = g * Math.PI / 180;
+      let L = (q + 1.915 * Math.sin(gRad) + 0.020 * Math.sin(2 * gRad)) % 360; // الطول المساري للشمس
+      let LRad = L * Math.PI / 180;
+      let e = (23.439 - 0.00000036 * D) % 360; // ميل دائرة البروج
+      let eRad = e * Math.PI / 180;
+
+      // المطلع المستقيم والميل الشمسي (Declination)
+      let RA = Math.atan2(Math.cos(eRad) * Math.sin(LRad), Math.cos(LRad)) * 180 / Math.PI;
+      RA = (RA + 360) % 360;
+      let decl = Math.asin(Math.sin(eRad) * Math.sin(LRad)) * 180 / Math.PI; // الميل الشمسي بالدرجات
+      let declRad = decl * Math.PI / 180;
+
+      // معادلة الزمن لحساب الفارق بالدقائق (Equation of Time)
+      let q_norm = q % 360;
+      let RA_norm = RA % 360;
+      let diff = q_norm - RA_norm;
+      if (diff < -180) diff += 360;
+      if (diff > 180) diff -= 360;
+      let EqT_hours = diff / 15;
+
+      let latRad = userLatitude * Math.PI / 180;
+
+      // حساب زاوية الساعة الجغرافية (Hour Angle) لكل فريضة صلاة
       function hourAngle(angle) {
-        const angleRad = angle * Math.PI / 180;
-        const cosH = (Math.sin(angleRad) - Math.sin(latRad) * Math.sin(decRad)) / (Math.cos(latRad) * Math.cos(decRad));
+        let angleRad = angle * Math.PI / 180;
+        let cosH = (Math.sin(angleRad) - Math.sin(latRad) * Math.sin(declRad)) / (Math.cos(latRad) * Math.cos(declRad));
         if (cosH > 1) return 0;
-        if (cosH < -1) return Math.PI;
+        if (cosH < -1) return 180; // حد أقصى 180 درجة (12 ساعة)
         return Math.acos(cosH) * 180 / Math.PI;
       }
 
-      // حساب الزوايا المعتمدة في جمهورية مصر العربية والدول الإسلامية
-      const fajrH = hourAngle(-19.5) / 15;
-      const sunriseH = hourAngle(-0.833) / 15;
-      const sunsetH = hourAngle(-0.833) / 15;
-      const ishaH = hourAngle(-17.5) / 15;
+      // المنطقة الزمنية لمصر: صيفي (+3)، شتوي (+2)
+      const timezone = dstActive ? 3 : 2; 
 
-      const asrAngle = Math.atan(1 + Math.tan(Math.abs(latRad - decRad)));
-      const asrH = hourAngle(90 - (asrAngle * 180 / Math.PI)) / 15;
+      // حساب وقت الظهر بدقة تامة بناءً على خط الطول وموقع الشمس
+      let dhuhrTimeDecimal = 12 - EqT_hours + (timezone - userLongitude / 15);
+
+      // احتساب مواقيت الفجر والعشاء والشروق والغروب فلكياً (المساحة المصرية)
+      let H_fajr = hourAngle(-19.5) / 15;   // زاوية الفجر 19.5
+      let H_sunrise = hourAngle(-0.833) / 15; // زاوية الشروق الفعلية
+      let H_sunset = hourAngle(-0.833) / 15;  // زاوية الغروب الفعلية
+      let H_isha = hourAngle(-17.5) / 15;   // زاوية العشاء 17.5
+
+      // حساب وقت العصر (المذهب الشافعي والجمهور: ظل الشيء مثله)
+      let asrAngleRad = Math.atan(1 / (1 + Math.tan(Math.abs(latRad - declRad))));
+      let asrAngleDeg = asrAngleRad * 180 / Math.PI;
+      let H_asr = hourAngle(asrAngleDeg) / 15;
 
       const prayers = {
-        fajr: formatDecimalTime(dhuhrTimeDecimal - fajrH),
-        sunrise: formatDecimalTime(dhuhrTimeDecimal - sunriseH),
+        fajr: formatDecimalTime(dhuhrTimeDecimal - H_fajr),
+        sunrise: formatDecimalTime(dhuhrTimeDecimal - H_sunrise),
         dhuhr: formatDecimalTime(dhuhrTimeDecimal),
-        asr: formatDecimalTime(dhuhrTimeDecimal + asrH),
-        maghrib: formatDecimalTime(dhuhrTimeDecimal + sunsetH),
-        isha: formatDecimalTime(dhuhrTimeDecimal + ishaH)
+        asr: formatDecimalTime(dhuhrTimeDecimal + H_asr),
+        maghrib: formatDecimalTime(dhuhrTimeDecimal + H_sunset),
+        isha: formatDecimalTime(dhuhrTimeDecimal + H_isha)
       };
 
+      // عرض المواعيد الدقيقة على الواجهة
       document.getElementById('time-fajr').textContent = formatTimeTo12Hour(prayers.fajr);
       document.getElementById('time-sunrise').textContent = formatTimeTo12Hour(prayers.sunrise);
       document.getElementById('time-dhuhr').textContent = formatTimeTo12Hour(prayers.dhuhr);
@@ -1362,6 +1387,7 @@
       modalActionCallback = callback;
     }
 
+    // إغلاق المنبه وإيقاف صوت الأذان
     function closeNotificationModal() {
       document.getElementById('custom-notification-modal').classList.add('hidden');
       stopAdhanAudio();
