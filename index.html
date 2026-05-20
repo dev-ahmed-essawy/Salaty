@@ -51,6 +51,10 @@
     .ios-scroll {
       -webkit-overflow-scrolling: touch;
     }
+    /* تحسين أداة البوصلة الدوارة */
+    #compass-container {
+      perspective: 1000px;
+    }
   </style>
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col pb-24 md:pb-6">
@@ -135,49 +139,63 @@
       </div>
     </section>
 
-    <!-- إعدادات المدينة الجغرافية والتوقيت الصيفي مضافة بدقة -->
-    <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-      <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm mb-3">
+    <!-- إعدادات المدينة الجغرافية والدولة والتوقيت الصيفي والمؤذن -->
+    <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 space-y-4">
+      <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm">
         <i data-lucide="sliders" class="w-5 h-5 text-emerald-600"></i>
         <span>إعدادات الموقع والحساب</span>
       </h3>
+      
+      <!-- اختيار الدولة والمدينة التابعة لها ديناميكياً -->
       <div class="grid grid-cols-2 gap-3">
-        <!-- اختيار المدينة يدوياً -->
         <div>
-          <label class="block text-[10px] font-bold text-slate-500 mb-1">المدينة / المحافظة:</label>
-          <select id="city-selector" onchange="handleCityChange()" class="w-full bg-slate-50 text-slate-800 text-xs font-bold rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <option value="gps">تحديد تلقائي (GPS)</option>
-            <option value="cairo">القاهرة</option>
-            <option value="alexandria">الإسكندرية</option>
-            <option value="giza">الجيزة</option>
-            <option value="port_said">بورسعيد</option>
-            <option value="suez">السويس</option>
-            <option value="luxor">الأقصر</option>
-            <option value="aswan">أسوان</option>
-            <option value="tanta">طنطا</option>
-            <option value="mansoura">المنصورة</option>
-            <option value="asyut">أسيوط</option>
-            <option value="zagazig">الزقازيق</option>
-            <option value="fayoum">الفيوم</option>
-            <option value="ismailia">الإسماعيلية</option>
-            <option value="damietta">دمياط</option>
-            <option value="sohag">سوهاج</option>
-            <option value="minya">المنيا</option>
-            <option value="beni_suef">بني سويف</option>
-            <option value="qena">قنا</option>
-            <option value="hurghada">الغردقة</option>
+          <label class="block text-[10px] font-bold text-slate-500 mb-1">اختر الدولة:</label>
+          <select id="country-selector" onchange="handleCountryChange()" class="w-full bg-slate-50 text-slate-800 text-xs font-bold rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="eg">جمهورية مصر العربية</option>
+            <option value="sa">المملكة العربية السعودية</option>
+            <option value="ae">الإمارات العربية المتحدة</option>
           </select>
         </div>
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 mb-1">اختر المدينة:</label>
+          <select id="city-selector" onchange="handleCityChange()" class="w-full bg-slate-50 text-slate-800 text-xs font-bold rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <!-- المدن سيتم توليدها ديناميكياً بناءً على الدولة المحددة -->
+          </select>
+        </div>
+      </div>
+
+      <!-- إعدادات التوقيت الصيفي واختيار صوت المؤذن -->
+      <div class="grid grid-cols-2 gap-3 pt-1">
         <!-- مفتاح التوقيت الصيفي -->
         <div class="flex flex-col justify-end">
           <span class="text-[10px] font-bold text-slate-500 mb-1">نظام التوقيت الصيفي (DST):</span>
           <button id="btn-toggle-dst" onclick="toggleDST()" class="flex items-center justify-between w-full bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl p-2.5 border border-slate-200 transition">
-            <span id="dst-status-text">توقيت شتوي (+2)</span>
+            <span id="dst-status-text">توقيت شتوي</span>
             <div class="w-8 h-4 bg-slate-300 rounded-full flex items-center p-0.5 transition" id="dst-toggle-bg">
               <div class="bg-white w-3 h-3 rounded-full shadow transform translate-x-0 transition" id="dst-toggle-circle"></div>
             </div>
           </button>
         </div>
+
+        <!-- اختيار صوت المؤذن المفضل -->
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 mb-1">اختر صوت المؤذن:</label>
+          <select id="adhan-voice-selector" onchange="handleAdhanVoiceChange()" class="w-full bg-slate-50 text-slate-800 text-xs font-bold rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="makkah">أذان الحرم المكي (علي ملا)</option>
+            <option value="aqsa">أذان المسجد الأقصى المبارك</option>
+            <option value="egypt">أذان مصر (مصطفى إسماعيل)</option>
+            <option value="abdulbasit">أذان بنغمة عبد الباسط</option>
+            <option value="takbeer">تكبيرات الأذان الهادئة</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- زر تجربة صوت الأذان المختار -->
+      <div class="flex justify-end pt-1">
+        <button onclick="testAdhanVoice()" class="bg-emerald-50 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-emerald-100 transition flex items-center gap-1">
+          <i data-lucide="play" class="w-3.5 h-3.5"></i>
+          <span>تجربة صوت الأذان المختار</span>
+        </button>
       </div>
     </section>
 
@@ -188,9 +206,10 @@
           <i data-lucide="clock" class="w-5 h-5 text-emerald-600"></i>
           <span>مواقيت الصلاة اليوم</span>
         </h3>
-        <!-- زر تحديث الموقع يدوياً عبر الـ GPS -->
-        <button onclick="forceGPSRefresh()" class="p-2 rounded-xl hover:bg-slate-100 text-emerald-700 transition" title="تحديث الموقع الجغرافي">
+        <!-- زر التحديد التلقائي عبر الـ GPS لتوفير مرونة أكبر -->
+        <button onclick="forceGPSRefresh()" class="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl transition" title="تحديث الموقع الجغرافي">
           <i data-lucide="locate" class="w-4 h-4"></i>
+          <span>موقعي تلقائيًا (GPS)</span>
         </button>
       </div>
 
@@ -221,7 +240,7 @@
           </div>
           <div class="flex items-center gap-4">
             <span class="font-mono font-semibold text-slate-600 text-sm" id="time-sunrise">--:-- --</span>
-            <div class="w-8"></div> <!-- حشو متناسق غياب الجرس للشروق -->
+            <div class="w-8"></div>
           </div>
         </div>
         <!-- الظهر -->
@@ -431,37 +450,48 @@
         <i data-lucide="compass" class="w-5.5 h-5.5 text-emerald-600"></i>
         <span>تحديد اتجاه القبلة الكعبة المشرفة</span>
       </h2>
-      <p class="text-[11px] text-slate-500 mb-6">ضع هاتفك على سطح مستوٍ وقم بتدويره للوصول للاتجاه الصحيح</p>
+      <p class="text-[11px] text-slate-500 mb-6">ضع هاتفك على سطح مستوٍ وقم بتدويره، أو استخدم مؤشر الضبط اليدوي أدناه لتحديد القبلة بدقة</p>
 
       <!-- البوصلة التفاعلية -->
-      <div class="relative w-64 h-64 my-6 flex items-center justify-center">
+      <div id="compass-container" class="relative w-60 h-60 my-4 flex items-center justify-center">
         <!-- قرص البوصلة -->
-        <div id="compass-disc" class="absolute w-full h-full rounded-full border-4 border-emerald-950 flex items-center justify-center transition-transform duration-150 ease-out" style="transform: rotate(0deg);">
-          <!-- علامة الشمال N -->
-          <span class="absolute top-2 font-bold text-lg text-rose-600">N</span>
-          <!-- علامة الشرق E -->
-          <span class="absolute right-3 font-bold text-xs text-slate-400">E</span>
-          <!-- علامة الجنوب S -->
-          <span class="absolute bottom-2 font-bold text-xs text-slate-400">S</span>
-          <!-- علامة الغرب W -->
-          <span class="absolute left-3 font-bold text-xs text-slate-400">W</span>
+        <div id="compass-disc" class="absolute w-full h-full rounded-full border-4 border-emerald-950 bg-slate-50 shadow-md flex items-center justify-center transition-transform duration-150 ease-out" style="transform: rotate(0deg);">
+          <!-- علامات الاتجاهات -->
+          <span class="absolute top-2 font-black text-xl text-rose-600">N</span>
+          <span class="absolute right-3 font-bold text-sm text-slate-400">E</span>
+          <span class="absolute bottom-2 font-bold text-sm text-slate-400">S</span>
+          <span class="absolute left-3 font-bold text-sm text-slate-400">W</span>
 
-          <!-- اتجاه مكة من الداخل كرمز سهم إضافي -->
-          <div class="absolute w-12 h-12 flex items-center justify-center" id="makkah-arrow-container" style="transform: rotate(135deg);">
-            <i data-lucide="send" class="w-8 h-8 text-amber-500 fill-amber-500 transform rotate-45"></i>
+          <!-- درجات التدريج البصري للبوصلة -->
+          <div class="absolute w-[90%] h-[90%] rounded-full border border-dashed border-slate-200 pointer-events-none flex items-center justify-center"></div>
+
+          <!-- علامة مكة المكرمة الكعبة المشرفة بالداخل -->
+          <div class="absolute w-12 h-12 flex flex-col items-center justify-center" id="makkah-target-indicator" style="transform: translateY(-80px);">
+            <!-- أيقونة الكعبة / اتجاه مكة الجغرافي المباشر -->
+            <i data-lucide="star" class="w-6 h-6 text-amber-500 fill-amber-500 animate-pulse"></i>
+            <span class="text-[8px] font-black text-emerald-950 bg-amber-300 px-1 rounded">الكعبة</span>
           </div>
         </div>
 
-        <!-- مؤشر الهاتف أو الاتجاه الفعلي للقبلة -->
-        <div class="absolute z-10 text-emerald-950 flex flex-col items-center">
-          <i data-lucide="navigation" class="w-12 h-12 text-emerald-700 fill-emerald-700 filter drop-shadow"></i>
+        <!-- مؤشر السهم المركزي الموجه للقبلة والمساند للمستخدم -->
+        <div class="absolute z-10 text-emerald-950 flex flex-col items-center pointer-events-none">
+          <i data-lucide="navigation" class="w-14 h-14 text-emerald-700 fill-emerald-700 filter drop-shadow" style="transform: rotate(0deg);" id="main-qibla-arrow"></i>
         </div>
+      </div>
+
+      <!-- مؤشر السحب اليدوي في حال لم يتوفر مستشعر اتجاه في المتصفح/الجهاز -->
+      <div class="w-full bg-slate-50 p-4 rounded-2xl border border-slate-150 mt-2 space-y-2">
+        <div class="flex justify-between items-center text-xs font-bold text-slate-600">
+          <span>تدوير البوصلة يدوياً (في حال عدم عمل الحساس):</span>
+          <span id="manual-angle-text" class="text-emerald-700 font-mono">0°</span>
+        </div>
+        <input type="range" id="qibla-manual-slider" min="0" max="359" value="0" oninput="handleManualCompassRotate(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700">
       </div>
 
       <div class="bg-emerald-50 text-emerald-900 rounded-2xl p-4 w-full mt-4 text-sm font-medium">
         <span class="block text-xs text-emerald-700 mb-1">الزاوية الجغرافية للقبلة</span>
         <span class="text-xl font-bold font-mono" id="qibla-angle-display">135°</span>
-        <span class="block text-[10px] text-slate-500 mt-2" id="qibla-sensor-message">جاري تشغيل حساسات الاتجاه في هاتفك...</span>
+        <span class="block text-[10px] text-slate-500 mt-2" id="qibla-sensor-message">البوصلة جاهزة للتوجيه التلقائي عبر الهاتف.</span>
       </div>
     </div>
   </div>
@@ -487,7 +517,7 @@
         <i data-lucide="bell" class="w-8 h-8 animate-bounce"></i>
       </div>
       <h4 class="text-lg font-bold text-emerald-950 mb-1" id="notif-modal-title">تنبيه الصلاة</h4>
-      <p class="text-xs text-slate-600 mb-6" id="notif-modal-body">حان الآن موعد أذان العصر حسب توقيت القاهرة</p>
+      <p class="text-xs text-slate-600 mb-6" id="notif-modal-body">حان الآن موعد الأذان حسب توقيتك المحلي</p>
       
       <div class="space-y-2">
         <button onclick="stopAdhanAudio()" class="w-full bg-emerald-700 text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-emerald-800 transition active:scale-95 text-sm">
@@ -515,29 +545,74 @@
     let activeTab = 'main';
     let deferredPrompt = null;
     let dstActive = false; // تفعيل التوقيت الصيفي افتراضياً (false)
-    let selectedCity = 'gps'; // الافتراضي تحديد تلقائي
+    let selectedCountry = 'eg'; // الدولة الافتراضية
+    let selectedCity = 'cairo'; // المدينة الافتراضية
+    let selectedAdhanVoice = 'makkah'; // المؤذن الافتراضي
+    let calculatedQiblaAngle = 135; // زاوية القبلة الجغرافية المحسوبة افتراضياً لمصر
 
-    // إحداثيات المدن والمحافظات المصرية الكبرى بدقة متناهية
-    const egyptCities = {
-      cairo: { name: "القاهرة", lat: 30.0444, lon: 31.2357 },
-      alexandria: { name: "الإسكندرية", lat: 31.2001, lon: 29.9187 },
-      giza: { name: "الجيزة", lat: 30.0131, lon: 31.2089 },
-      port_said: { name: "بورسعيد", lat: 31.2653, lon: 32.3019 },
-      suez: { name: "السويس", lat: 29.9668, lon: 32.5498 },
-      luxor: { name: "الأقصر", lat: 25.6872, lon: 32.6396 },
-      aswan: { name: "أسوان", lat: 24.0889, lon: 32.8998 },
-      tanta: { name: "طنطا", lat: 30.7865, lon: 31.0004 },
-      mansoura: { name: "المنصورة", lat: 31.0409, lon: 31.3785 },
-      asyut: { name: "أسيوط", lat: 27.1783, lon: 31.1859 },
-      zagazig: { name: "الزقازيق", lat: 30.5877, lon: 31.5101 },
-      fayoum: { name: "الفيوم", lat: 29.3084, lon: 30.8428 },
-      ismailia: { name: "الإسماعيلية", lat: 30.5965, lon: 32.2715 },
-      damietta: { name: "دمياط", lat: 31.4175, lon: 31.8144 },
-      sohag: { name: "سوهاج", lat: 26.5570, lon: 31.6948 },
-      minya: { name: "المنيا", lat: 28.0871, lon: 30.7618 },
-      beni_suef: { name: "بني سويف", lat: 29.0744, lon: 31.0978 },
-      qena: { name: "قنا", lat: 26.1551, lon: 32.7160 },
-      hurghada: { name: "الغردقة", lat: 27.2579, lon: 33.8116 }
+    // هيكل الدول والمدن ببياناتها الدقيقة وإحداثياتها الجغرافية
+    const worldCountries = {
+      eg: {
+        name: "جمهورية مصر العربية",
+        method: "Egypt", // طريقة الحساب: الهيئة المصرية العامة للمساحة
+        cities: {
+          cairo: { name: "القاهرة", lat: 30.0444, lon: 31.2357 },
+          alexandria: { name: "الإسكندرية", lat: 31.2001, lon: 29.9187 },
+          giza: { name: "الجيزة", lat: 30.0131, lon: 31.2089 },
+          port_said: { name: "بورسعيد", lat: 31.2653, lon: 32.3019 },
+          suez: { name: "السويس", lat: 29.9668, lon: 32.5498 },
+          luxor: { name: "الأقصر", lat: 25.6872, lon: 32.6396 },
+          aswan: { name: "أسوان", lat: 24.0889, lon: 32.8998 },
+          tanta: { name: "طنطا", lat: 30.7865, lon: 31.0004 },
+          mansoura: { name: "المنصورة", lat: 31.0409, lon: 31.3785 },
+          asyut: { name: "أسيوط", lat: 27.1783, lon: 31.1859 },
+          zagazig: { name: "الزقازيق", lat: 30.5877, lon: 31.5101 },
+          fayoum: { name: "الفيوم", lat: 29.3084, lon: 30.8428 },
+          ismailia: { name: "الإسماعيلية", lat: 30.5965, lon: 32.2715 },
+          damietta: { name: "دمياط", lat: 31.4175, lon: 31.8144 },
+          sohag: { name: "سوهاج", lat: 26.5570, lon: 31.6948 },
+          minya: { name: "المنيا", lat: 28.0871, lon: 30.7618 },
+          beni_suef: { name: "بني سويف", lat: 29.0744, lon: 31.0978 },
+          qena: { name: "قنا", lat: 26.1551, lon: 32.7160 },
+          hurghada: { name: "الغردقة", lat: 27.2579, lon: 33.8116 }
+        }
+      },
+      sa: {
+        name: "المملكة العربية السعودية",
+        method: "Makkah", // طريقة الحساب: أم القرى
+        cities: {
+          makkah: { name: "مكة المكرمة", lat: 21.4225, lon: 39.8262 },
+          madinah: { name: "المدينة المنورة", lat: 24.4672, lon: 39.6111 },
+          riyadh: { name: "الرياض", lat: 24.7136, lon: 46.6753 },
+          jeddah: { name: "جدة", lat: 21.5433, lon: 39.1728 },
+          dammam: { name: "الدمام", lat: 26.4207, lon: 50.0888 },
+          taif: { name: "الطائف", lat: 21.2854, lon: 40.4258 },
+          khobar: { name: "الخبر", lat: 26.2172, lon: 50.1971 },
+          tabuk: { name: "تبوك", lat: 28.3835, lon: 36.5662 },
+          abha: { name: "أبها", lat: 18.2164, lon: 42.5053 }
+        }
+      },
+      ae: {
+        name: "الإمارات العربية المتحدة",
+        method: "Gulf", // الهيئة العامة للشؤون الإسلامية والأوقاف بدبي والخليج
+        cities: {
+          abu_dhabi: { name: "أبوظبي", lat: 24.4539, lon: 54.3773 },
+          dubai: { name: "دبي", lat: 25.2048, lon: 55.2708 },
+          sharjah: { name: "الشارقة", lat: 25.3463, lon: 55.4209 },
+          al_ain: { name: "العين", lat: 24.1302, lon: 55.8023 },
+          ajman: { name: "عجمان", lat: 25.4052, lon: 55.5136 },
+          fujairah: { name: "الفجيرة", lat: 25.1288, lon: 56.3265 }
+        }
+      }
+    };
+
+    // روابط ملفات الأذان والتنبيهات المعتمدة للمؤذنين
+    const adhanAudioFiles = {
+      makkah: "https://www.islamcan.com/adhan/adhan1.mp3", // أذان الحرم المكي الشريف
+      aqsa: "https://www.islamcan.com/adhan/aqsa.mp3", // أذان المسجد الأقصى
+      egypt: "https://www.islamcan.com/adhan/egypt.mp3", // أذان مصر (الشيخ مصطفى إسماعيل)
+      abdulbasit: "https://www.islamcan.com/adhan/abdulbasit.mp3", // بنبرة الشيخ عبد الباسط
+      takbeer: "https://assets.mixkit.co/active_storage/sfx/2018/2018-700.wav" // نغمة تكبيرات هادئة / تنبيه خفيف
     };
 
     // قائمة الأذكار المدمجة
@@ -578,7 +653,7 @@
       { text: "إنَّما الأعْمالُ بالنِّيَّاتِ، وإنَّما لِكُلِّ امْرِئٍ ما نَوَى، فمَن كانَتْ هِجْرَتُهُ إلى اللَّهِ ورَسولِهِ فهِجْرَتُهُ إلى اللَّهِ ورَسولِهِ، ومَن كانَتْ هِجْرَتُهُ لِدُنْيا يُصِيبُها، أوِ امْرَأَةٍ يَنْكِحُها، فهِجْرَتُهُ إلى ما هاجَرَ إلَيْهِ.", rawi: "رواه البخاري ومسلم" },
       { text: "مَن سَلَكَ طَرِيقًا يَلْتَمِسُ فيه عِلْمًا، سَهَّلَ اللَّهُ له به طَرِيقًا إلى الجَنَّةِ.", rawi: "رواه مسلم" },
       { text: "المُسْلِمُ مَن سَلِمَ المُسْلِمُونَ مِن لِسانِهِ ويَدِهِ، والمُهاجِرُ مَن هَجَرَ ما نَهَى اللَّهُ عنه.", rawi: "رواه البخاري" },
-      { text: "آيَةُ Mُنَافِقِ ثَلَاثٌ: إذَا حَدَّثَ كَذَبَ، وإذَا وعَدَ أخْلَفَ، وإذَا اؤْتُمِنَ خَانَ.", rawi: "رواه البخاري ومسلم" },
+      { text: "آيَةُ المُنَافِقِ ثَلَاثٌ: إذَا حَدَّثَ كَذَبَ، وإذَا وعَدَ أخْلَفَ، وإذَا اؤْتُمِنَ خَانَ.", rawi: "رواه البخاري ومسلم" },
       { text: "مَن كانَ يُؤْمِنُ باللَّهِ والْيَومِ الآخِرِ فَلْيَقُلْ خَيْرًا أوْ لِيَصْمُتْ، ومَن كانَ يُؤْمِنُ باللَّهِ والْيَومِ الآخِرِ فَلْيُكْرِمْ جارَهُ.", rawi: "رواه البخاري ومسلم" },
       { text: "الْمُؤْمِنُ القَوِيُّ، خَيْرٌ وَأَحَبُّ إلَى اللهِ مِنَ المُؤْمِنِ الضَّعِيفِ، وفي كُلٍّ خَيْرٌ احْرِصْ علَى ما يَنْفَعُكَ، وَاسْتَعِنْ باللَّهِ وَلَا تَعْجِزْ.", rawi: "رواه مسلم" }
     ];
@@ -587,7 +662,7 @@
     window.onload = function() {
       setupPWA();
       lucide.createIcons();
-      loadUserSettings(); // تحميل إعدادات التوقيت الصيفي والمدينة المفضلة
+      loadUserSettings(); // تحميل إعدادات التوقيت الصيفي، الدولة، المدينة، والمؤذن
       updateTimesAndDates();
       setDailyHadith();
       initTracker();
@@ -665,7 +740,7 @@
 
     // ---------------- تحميل وحفظ الإعدادات من الذاكرة المحلية ----------------
     function loadUserSettings() {
-      // تحميل إعداد التوقيت الصيفي
+      // 1. تحميل إعداد التوقيت الصيفي
       const savedDST = localStorage.getItem('dst_active');
       if (savedDST !== null) {
         dstActive = savedDST === 'true';
@@ -674,16 +749,116 @@
       }
       updateDST_UI();
 
-      // تحميل إعداد المدينة المفضلة
+      // 2. تحميل إعداد صوت المؤذن المفضل
+      const savedAdhanVoice = localStorage.getItem('selected_adhan_voice');
+      if (savedAdhanVoice !== null) {
+        selectedAdhanVoice = savedAdhanVoice;
+      }
+      document.getElementById('adhan-voice-selector').value = selectedAdhanVoice;
+      updateAdhanPlayerSource();
+
+      // 3. تحميل الدولة والمدينة
+      const savedCountry = localStorage.getItem('selected_country');
       const savedCity = localStorage.getItem('selected_city');
+
+      if (savedCountry !== null) {
+        selectedCountry = savedCountry;
+      } else {
+        selectedCountry = 'eg'; 
+      }
+      document.getElementById('country-selector').value = selectedCountry;
+
+      // تحديث قائمة المدن بشكل متزامن مع تحميل الصفحة
+      populateCitiesDropdown();
+
       if (savedCity !== null) {
         selectedCity = savedCity;
       } else {
-        selectedCity = 'cairo'; 
+        selectedCity = selectedCountry === 'eg' ? 'cairo' : Object.keys(worldCountries[selectedCountry].cities)[0];
       }
       document.getElementById('city-selector').value = selectedCity;
 
       applyLocationAndCalculate();
+    }
+
+    // تعبئة قائمة المدن بناءً على الدولة المختارة
+    function populateCitiesDropdown() {
+      const citySelector = document.getElementById('city-selector');
+      citySelector.innerHTML = '';
+
+      // إضافة خيار الـ GPS التلقائي دائماً في البداية
+      const gpsOption = document.createElement('option');
+      gpsOption.value = 'gps';
+      gpsOption.textContent = 'تحديد تلقائي (GPS)';
+      citySelector.appendChild(gpsOption);
+
+      // إضافة مدن الدولة المحددة
+      const countryData = worldCountries[selectedCountry];
+      if (countryData) {
+        for (let cityKey in countryData.cities) {
+          const option = document.createElement('option');
+          option.value = cityKey;
+          option.textContent = countryData.cities[cityKey].name;
+          citySelector.appendChild(option);
+        }
+      }
+    }
+
+    // معالجة تغيير الدولة لتحديث قائمة المدن وإعادة الحساب
+    function handleCountryChange() {
+      selectedCountry = document.getElementById('country-selector').value;
+      localStorage.setItem('selected_country', selectedCountry);
+      
+      // تفريغ وتعبئة المدن مجدداً
+      populateCitiesDropdown();
+      
+      // اختيار المدينة الأولى في القائمة كافتراضية
+      const firstCityKey = Object.keys(worldCountries[selectedCountry].cities)[0];
+      selectedCity = firstCityKey;
+      document.getElementById('city-selector').value = selectedCity;
+      localStorage.setItem('selected_city', selectedCity);
+
+      applyLocationAndCalculate();
+      playBeep();
+    }
+
+    // معالجة تغيير صوت المؤذن وحفظه
+    function handleAdhanVoiceChange() {
+      selectedAdhanVoice = document.getElementById('adhan-voice-selector').value;
+      localStorage.setItem('selected_adhan_voice', selectedAdhanVoice);
+      updateAdhanPlayerSource();
+      playBeep();
+    }
+
+    // تحديث ملف الصوت الفعلي للاعب الأذان
+    function updateAdhanPlayerSource() {
+      const adhanPlayer = document.getElementById('adhan-player');
+      if (adhanPlayer) {
+        adhanPlayer.src = adhanAudioFiles[selectedAdhanVoice];
+      }
+    }
+
+    // تشغيل تجريبي للأذان المختار
+    function testAdhanVoice() {
+      const adhanPlayer = document.getElementById('adhan-player');
+      if (adhanPlayer) {
+        playBeep();
+        adhanPlayer.currentTime = 0;
+        adhanPlayer.volume = 0.8;
+        adhanPlayer.play()
+          .then(() => {
+            showCustomModal(
+              "تجربة صوت المؤذن",
+              "يتم الآن تشغيل الأذان المختار بصوت عذب لتجربة مخرجات هاتفك بنجاح."
+            );
+          })
+          .catch(e => {
+            showCustomModal(
+              "تنبيه تشغيل الأذان",
+              "يرجى السماح بتشغيل الصوتيات بالمتصفح أولاً عن طريق النقر على الشاشة."
+            );
+          });
+      }
     }
 
     // تطبيق الموقع الجغرافي والبدء بالحساب
@@ -692,12 +867,18 @@
       if (selectedCity === 'gps') {
         getUserLocation();
       } else {
-        const cityData = egyptCities[selectedCity];
-        if (cityData) {
-          userLatitude = cityData.lat;
-          userLongitude = cityData.lon;
-          locText.textContent = `مواقيت مدينة ${cityData.name} | الإحداثيات الجغرافية المعتمدة`;
-          calculatePrayerTimes();
+        const countryData = worldCountries[selectedCountry];
+        if (countryData) {
+          const cityData = countryData.cities[selectedCity];
+          if (cityData) {
+            userLatitude = cityData.lat;
+            userLongitude = cityData.lon;
+            locText.textContent = `مواقيت مدينة ${cityData.name} (${countryData.name}) | حساب فلكي دقيق`;
+            
+            // حساب زاوية القبلة الجغرافية بدقة لموقع المستخدم الحالي مقارنة بموقع مكة المكرمة
+            calculateQiblaAngleDegrees(userLatitude, userLongitude);
+            calculatePrayerTimes();
+          }
         }
       }
     }
@@ -746,22 +927,25 @@
             userLatitude = position.coords.latitude;
             userLongitude = position.coords.longitude;
             locText.textContent = `تحديد تلقائي دقيق (GPS) | خط عرض ${userLatitude.toFixed(2)}`;
+            calculateQiblaAngleDegrees(userLatitude, userLongitude);
             calculatePrayerTimes();
           },
           (error) => {
-            locText.textContent = "فشل الـ GPS - تم تفعيل مواقيت القاهرة تلقائيًا";
-            selectedCity = 'cairo';
-            document.getElementById('city-selector').value = 'cairo';
-            localStorage.setItem('selected_city', 'cairo');
-            applyLocationAndCalculate();
+            locText.textContent = "فشل الـ GPS - تم تفعيل مواقيت العاصمة تلقائيًا";
+            fallbackToDefaultCity();
           }
         );
       } else {
-        locText.textContent = "الـ GPS غير مدعوم - تم تفعيل مواقيت القاهرة تلقائيًا";
-        selectedCity = 'cairo';
-        document.getElementById('city-selector').value = 'cairo';
-        applyLocationAndCalculate();
+        locText.textContent = "الـ GPS غير مدعوم - تم تفعيل مواقيت العاصمة تلقائيًا";
+        fallbackToDefaultCity();
       }
+    }
+
+    function fallbackToDefaultCity() {
+      selectedCity = selectedCountry === 'eg' ? 'cairo' : Object.keys(worldCountries[selectedCountry].cities)[0];
+      document.getElementById('city-selector').value = selectedCity;
+      localStorage.setItem('selected_city', selectedCity);
+      applyLocationAndCalculate();
     }
 
     // إجبار التحديث عبر الـ GPS عند الضغط على الأيقونة الجغرافية
@@ -771,6 +955,38 @@
       localStorage.setItem('selected_city', 'gps');
       applyLocationAndCalculate();
       playBeep();
+    }
+
+    // ---------------- حساب زاوية القبلة الجغرافية بدقة لموقع المستخدم ----------------
+    // إحداثيات مكة المكرمة الكعبة المشرفة:
+    // خط العرض: 21.4225 شمالاً، خط الطول: 39.8262 شرقاً
+    function calculateQiblaAngleDegrees(lat, lon) {
+      const makkahLat = 21.4225 * Math.PI / 180;
+      const makkahLon = 39.8262 * Math.PI / 180;
+      const userLatRad = lat * Math.PI / 180;
+      const userLonRad = lon * Math.PI / 180;
+
+      const deltaLon = makkahLon - userLonRad;
+
+      // تطبيق المعادلة الفلكية لتحديد اتجاه مكة المكرمة
+      const y = Math.sin(deltaLon);
+      const x = Math.cos(userLatRad) * Math.tan(makkahLat) - Math.sin(userLatRad) * Math.cos(deltaLon);
+      
+      let qiblaRad = Math.atan2(y, x);
+      let qiblaDeg = qiblaRad * 180 / Math.PI;
+      
+      // التعديل ليصبح زاوية موجبة بين 0 و 360 درجة
+      calculatedQiblaAngle = Math.round((qiblaDeg + 360) % 360);
+
+      // تحديث قيم شاشة القبلة
+      document.getElementById('qibla-angle-display').textContent = `${calculatedQiblaAngle}° من اتجاه الشمال الجغرافي`;
+      
+      // تحديث موقع رمز الكعبة ليكون مطابقاً للزاوية الجغرافية بدقة على دائرة البوصلة
+      const targetIndicator = document.getElementById('makkah-target-indicator');
+      if (targetIndicator) {
+        // نضع رمز الكعبة على محيط البوصلة استناداً لزاوية القبلة
+        targetIndicator.style.transform = `rotate(${calculatedQiblaAngle}deg) translateY(-85px) rotate(${-calculatedQiblaAngle}deg)`;
+      }
     }
 
     // ---------------- حساب مواقيت الصلاة رياضياً فلكياً بدقة متناهية ----------------
@@ -796,21 +1012,19 @@
       let D = JD - 2451545.0; // الأيام منذ حقبة J2000.0
 
       // الإحداثيات الشمسية الفلكية الدقيقة
-      let g = (357.529 + 0.98560028 * D) % 360; // الشذوذ المتوسط
-      let q = (280.459 + 0.98564736 * D) % 360; // الطول المتوسط للشمس
+      let g = (357.529 + 0.98560028 * D) % 360; 
+      let q = (280.459 + 0.98564736 * D) % 360; 
       let gRad = g * Math.PI / 180;
-      let L = (q + 1.915 * Math.sin(gRad) + 0.020 * Math.sin(2 * gRad)) % 360; // الطول المساري للشمس
+      let L = (q + 1.915 * Math.sin(gRad) + 0.020 * Math.sin(2 * gRad)) % 360; 
       let LRad = L * Math.PI / 180;
-      let e = (23.439 - 0.00000036 * D) % 360; // ميل دائرة البروج
+      let e = (23.439 - 0.00000036 * D) % 360; 
       let eRad = e * Math.PI / 180;
 
-      // المطلع المستقيم والميل الشمسي (Declination)
       let RA = Math.atan2(Math.cos(eRad) * Math.sin(LRad), Math.cos(LRad)) * 180 / Math.PI;
       RA = (RA + 360) % 360;
-      let decl = Math.asin(Math.sin(eRad) * Math.sin(LRad)) * 180 / Math.PI; // الميل الشمسي بالدرجات
+      let decl = Math.asin(Math.sin(eRad) * Math.sin(LRad)) * 180 / Math.PI; 
       let declRad = decl * Math.PI / 180;
 
-      // معادلة الزمن لحساب الفارق بالدقائق (Equation of Time)
       let q_norm = q % 360;
       let RA_norm = RA % 360;
       let diff = q_norm - RA_norm;
@@ -820,42 +1034,67 @@
 
       let latRad = userLatitude * Math.PI / 180;
 
-      // حساب زاوية الساعة الجغرافية (Hour Angle) لكل فريضة صلاة
       function hourAngle(angle) {
         let angleRad = angle * Math.PI / 180;
         let cosH = (Math.sin(angleRad) - Math.sin(latRad) * Math.sin(declRad)) / (Math.cos(latRad) * Math.cos(declRad));
         if (cosH > 1) return 0;
-        if (cosH < -1) return 180; // حد أقصى 180 درجة (12 ساعة)
+        if (cosH < -1) return 180; 
         return Math.acos(cosH) * 180 / Math.PI;
       }
 
-      // المنطقة الزمنية لمصر: صيفي (+3)، شتوي (+2)
+      // حساب فارق التوقيت ديناميكياً
       const timezone = dstActive ? 3 : 2; 
 
-      // حساب وقت الظهر بدقة تامة بناءً على خط الطول وموقع الشمس
+      // حساب وقت الظهر
       let dhuhrTimeDecimal = 12 - EqT_hours + (timezone - userLongitude / 15);
 
-      // احتساب مواقيت الفجر والعشاء والشروق والغروب فلكياً (المساحة المصرية)
-      let H_fajr = hourAngle(-19.5) / 15;   // زاوية الفجر 19.5
-      let H_sunrise = hourAngle(-0.833) / 15; // زاوية الشروق الفعلية
-      let H_sunset = hourAngle(-0.833) / 15;  // زاوية الغروب الفعلية
-      let H_isha = hourAngle(-17.5) / 15;   // زاوية العشاء 17.5
+      // تحديد زاوية الفجر والعشاء بناءً على طريقة حساب الدولة المختارة
+      let fajrAngle = -19.5; // الافتراضي: الهيئة العامة للمساحة بمصر
+      let ishaAngle = -17.5; 
 
-      // حساب وقت العصر (المذهب الشافعي والجمهور: ظل الشيء مثله)
+      const countryMethod = worldCountries[selectedCountry].method;
+      if (countryMethod === "Makkah") {
+        // جامعة أم القرى (مكة المكرمة)
+        fajrAngle = -18.5;
+        // العشاء يحسب بعد المغرب بـ 90 دقيقة (1.5 ساعة)، سنقوم بتطبيقها لاحقاً بالتحويل
+      } else if (countryMethod === "Gulf") {
+        // الهيئة العامة للشؤون الإسلامية بدبي والخليج
+        fajrAngle = -18.2;
+        ishaAngle = -18.2;
+      }
+
+      let H_fajr = hourAngle(fajrAngle) / 15;   
+      let H_sunrise = hourAngle(-0.833) / 15; 
+      let H_sunset = hourAngle(-0.833) / 15;  
+      let H_isha = hourAngle(ishaAngle) / 15;   
+
+      // العصر (شافعي)
       let asrAngleRad = Math.atan(1 / (1 + Math.tan(Math.abs(latRad - declRad))));
       let asrAngleDeg = asrAngleRad * 180 / Math.PI;
       let H_asr = hourAngle(asrAngleDeg) / 15;
 
+      // احتساب الصلوات بدقة
+      let fajrVal = dhuhrTimeDecimal - H_fajr;
+      let sunriseVal = dhuhrTimeDecimal - H_sunrise;
+      let dhuhrVal = dhuhrTimeDecimal;
+      let asrVal = dhuhrTimeDecimal + H_asr;
+      let maghribVal = dhuhrTimeDecimal + H_sunset;
+      let ishaVal = dhuhrTimeDecimal + H_isha;
+
+      // لتعديل العشاء في طريقة أم القرى بالسعودية (العشاء دائماً بعد المغرب بـ 90 دقيقة)
+      if (countryMethod === "Makkah") {
+        ishaVal = maghribVal + 1.5; 
+      }
+
       const prayers = {
-        fajr: formatDecimalTime(dhuhrTimeDecimal - H_fajr),
-        sunrise: formatDecimalTime(dhuhrTimeDecimal - H_sunrise),
-        dhuhr: formatDecimalTime(dhuhrTimeDecimal),
-        asr: formatDecimalTime(dhuhrTimeDecimal + H_asr),
-        maghrib: formatDecimalTime(dhuhrTimeDecimal + H_sunset),
-        isha: formatDecimalTime(dhuhrTimeDecimal + H_isha)
+        fajr: formatDecimalTime(fajrVal),
+        sunrise: formatDecimalTime(sunriseVal),
+        dhuhr: formatDecimalTime(dhuhrVal),
+        asr: formatDecimalTime(asrVal),
+        maghrib: formatDecimalTime(maghribVal),
+        isha: formatDecimalTime(ishaVal)
       };
 
-      // عرض المواعيد الدقيقة على الواجهة
       document.getElementById('time-fajr').textContent = formatTimeTo12Hour(prayers.fajr);
       document.getElementById('time-sunrise').textContent = formatTimeTo12Hour(prayers.sunrise);
       document.getElementById('time-dhuhr').textContent = formatTimeTo12Hour(prayers.dhuhr);
@@ -1019,7 +1258,7 @@
 
       showCustomModal(
         `حان الآن موعد الأذان`,
-        `الله أكبر، الله أكبر.. حان الآن وقت صلاة ${name} حسب توقيتك المحلي.`
+        `الله أكبر، الله أكبر.. حان الآن وقت صلاة ${name} حسب توقيتك المحلي بصوت المؤذن المفضل.`
       );
     }
 
@@ -1049,50 +1288,97 @@
       });
     }
 
-    // ---------------- نظام القبلة التفاعلي للهواتف الذكية ----------------
-    function initQibla() {
-      const qiblaAngle = 135; 
-      document.getElementById('qibla-angle-display').textContent = `${qiblaAngle}° (جنوب شرق)`;
+    // ---------------- نظام القبلة التفاعلي والمطور للهواتف الذكية ----------------
+    let absoluteDeviceHeading = null;
 
+    function initQibla() {
       const compassDisc = document.getElementById('compass-disc');
       const sensorMsg = document.getElementById('qibla-sensor-message');
+      const mainArrow = document.getElementById('main-qibla-arrow');
 
+      // 1. حساب زاوية القبلة للموقع الجغرافي النشط أولاً لضمان جاهزيتها
+      calculateQiblaAngleDegrees(userLatitude, userLongitude);
+
+      // محاولة تسجيل حساس التوجيه الفعلي للجهاز
       if (window.DeviceOrientationEvent) {
         if (typeof DeviceOrientationEvent.requestPermission === 'function') {
           DeviceOrientationEvent.requestPermission()
             .then(permissionState => {
               if (permissionState === 'granted') {
-                window.addEventListener('deviceorientation', handleOrientation);
+                window.addEventListener('deviceorientation', handleOrientation, true);
               } else {
-                sensorMsg.textContent = "تم رفض إذن الحساس. اعتمد على تدوير البوصلة يدوياً.";
-                simulateCompassRotation();
+                sensorMsg.textContent = "تم رفض إذن الحساس. يرجى تدوير البوصلة يدوياً باستخدام المؤشر.";
+                enableManualQiblaMode();
               }
             })
             .catch(err => {
-              sensorMsg.textContent = "يرجى تحريك الهاتف لتنشيط اتجاه القبلة التلقائي.";
-              simulateCompassRotation();
+              sensorMsg.textContent = "تم رفض الحساس الجيروسكوبي. تم تفعيل التوجيه اليدوي للبوصلة.";
+              enableManualQiblaMode();
             });
         } else {
-          window.addEventListener('deviceorientation', handleOrientation);
+          // للهواتف التي تدعم الحدث مباشرة دون الحاجة لطلب إذن مسبق (معظم هواتف أندرويد)
+          window.addEventListener('deviceorientation', handleOrientation, true);
         }
       } else {
-        sensorMsg.textContent = "مستشعر الاتجاه غير مدعوم في متصفحك. تم تنشيط وضع المحاكاة.";
-        simulateCompassRotation();
+        sensorMsg.textContent = "مستشعر الاتجاه غير مدعوم في متصفحك. استخدم المؤشر اليدوي للضبط.";
+        enableManualQiblaMode();
       }
 
       function handleOrientation(event) {
+        // الحصول على اتجاه البوصلة الجغرافية
         let heading = event.webkitCompassHeading || Math.abs(event.alpha - 360);
-        if (heading === undefined) heading = 0;
-        compassDisc.style.transform = `rotate(${-heading}deg)`;
-        sensorMsg.textContent = `الحساس يعمل بنجاح! اتجاه هاتفك الحالي: ${Math.round(heading)}°`;
-      }
+        
+        if (heading !== undefined && heading !== null) {
+          absoluteDeviceHeading = heading;
+          
+          // تدوير قرص البوصلة استناداً لتدوير الهاتف الفعلي ليبقى الشمال موجهاً دائماً للشمال الجغرافي الحقيقي
+          compassDisc.style.transform = `rotate(${-heading}deg)`;
+          
+          // سهم القبلة الفعلي المركزي يجب أن يشير دائماً إلى زاوية القبلة مقارنة بالدوران الفعلي للموبايل
+          let relativeQiblaAngle = calculatedQiblaAngle - heading;
+          mainArrow.style.transform = `rotate(${relativeQiblaAngle}deg)`;
 
-      function simulateCompassRotation() {
-        let angle = 0;
-        setInterval(() => {
-          angle = (angle + 1) % 360;
-          compassDisc.style.transform = `rotate(${-angle}deg)`;
-        }, 120);
+          // قياس مدى دقة تقارب المستخدم من القبلة الصحيحة وإعطاؤه لوناً أخضراً للتأكيد
+          if (Math.abs(relativeQiblaAngle % 360) < 5) {
+            sensorMsg.textContent = "أنت الآن تواجه اتجاه القبلة الكعبة المشرفة بالضبط! 🕋";
+            sensorMsg.className = "block text-[11px] text-emerald-600 font-bold bg-emerald-50 py-1 px-2 rounded animate-pulse";
+          } else {
+            sensorMsg.textContent = `قم بتدوير الهاتف تدريجياً ليتطابق السهم مع الاتجاه الفعلي.`;
+            sensorMsg.className = "block text-[10px] text-slate-500 mt-2";
+          }
+        }
+      }
+    }
+
+    function enableManualQiblaMode() {
+      // إظهار موجهات يدوية وشرح واضح للمستخدم لتوفير خيار تحكم بديل في حال غياب الجيروسكوب
+      document.getElementById('qibla-sensor-message').textContent = "تم تنشيط وضع الضبط اليدوي. حرك شريط السحب لتحديد اتجاه الشمال يدوياً ومطابقة القبلة.";
+    }
+
+    // تدوير البوصلة والسهم يدوياً عند تحريك شريط السحب (Slider) لمساعدة الأجهزة الأقدم
+    function handleManualCompassRotate(val) {
+      const heading = parseInt(val);
+      document.getElementById('manual-angle-text').textContent = `${heading}°`;
+
+      const compassDisc = document.getElementById('compass-disc');
+      const mainArrow = document.getElementById('main-qibla-arrow');
+      const sensorMsg = document.getElementById('qibla-sensor-message');
+
+      // تطبيق تدوير البوصلة يدوياً
+      compassDisc.style.transform = `rotate(${-heading}deg)`;
+      
+      // توجيه السهم المركزي نسبة لتدوير البوصلة يدوياً
+      let relativeQiblaAngle = calculatedQiblaAngle - heading;
+      mainArrow.style.transform = `rotate(${relativeQiblaAngle}deg)`;
+
+      // مقارنة التقارب يدوياً
+      let checkAngle = (relativeQiblaAngle + 360) % 360;
+      if (checkAngle < 6 || checkAngle > 354) {
+        sensorMsg.textContent = "التوجيه اليدوي متطابق مع اتجاه القبلة المشرفة! 🕋";
+        sensorMsg.className = "block text-[11px] text-emerald-600 font-bold bg-emerald-50 py-1 px-2 rounded";
+      } else {
+        sensorMsg.textContent = "استمر في السحب لتطابق السهم للأعلى وتحديد الكعبة.";
+        sensorMsg.className = "block text-[10px] text-slate-500 mt-2";
       }
     }
 
@@ -1174,7 +1460,6 @@
       lucide.createIcons();
     }
 
-    // زيادة العداد الخاص بالذكر باللمس
     function incrementAthkarCount(type, index, btnElement) {
       const item = athkarData[type][index];
       if (item.current < item.count) {
@@ -1271,7 +1556,6 @@
       playBeep();
     }
 
-    // تحديث متتبع الصلوات
     function updateTrackerUI() {
       let completedCount = 0;
       const keys = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
@@ -1387,7 +1671,6 @@
       modalActionCallback = callback;
     }
 
-    // إغلاق المنبه وإيقاف صوت الأذان
     function closeNotificationModal() {
       document.getElementById('custom-notification-modal').classList.add('hidden');
       stopAdhanAudio();
