@@ -124,7 +124,7 @@
             <option value="5">٥ د</option>
             <option value="10">١٠ د</option>
             <option value="15" selected>١٥ د</option>
-            <option value="20">٢٠ د</option>
+            <option value="20">٢0 د</option>
             <option value="30">٣٠ د</option>
           </select>
         </div>
@@ -135,6 +135,52 @@
       </div>
     </section>
 
+    <!-- إعدادات المدينة الجغرافية والتوقيت الصيفي مضافة بدقة -->
+    <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+      <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm mb-3">
+        <i data-lucide="sliders" class="w-5 h-5 text-emerald-600"></i>
+        <span>إعدادات الموقع والحساب</span>
+      </h3>
+      <div class="grid grid-cols-2 gap-3">
+        <!-- اختيار المدينة يدوياً -->
+        <div>
+          <label class="block text-[10px] font-bold text-slate-500 mb-1">المدينة / المحافظة:</label>
+          <select id="city-selector" onchange="handleCityChange()" class="w-full bg-slate-50 text-slate-800 text-xs font-bold rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="gps">تحديد تلقائي (GPS)</option>
+            <option value="cairo">القاهرة</option>
+            <option value="alexandria">الإسكندرية</option>
+            <option value="giza">الجيزة</option>
+            <option value="port_said">بورسعيد</option>
+            <option value="suez">السويس</option>
+            <option value="luxor">الأقصر</option>
+            <option value="aswan">أسوان</option>
+            <option value="tanta">طنطا</option>
+            <option value="mansoura">المنصورة</option>
+            <option value="asyut">أسيوط</option>
+            <option value="zagazig">الزقازيق</option>
+            <option value="fayoum">الفيوم</option>
+            <option value="ismailia">الإسماعيلية</option>
+            <option value="damietta">دمياط</option>
+            <option value="sohag">سوهاج</option>
+            <option value="minya">المنيا</option>
+            <option value="beni_suef">بني سويف</option>
+            <option value="qena">قنا</option>
+            <option value="hurghada">الغردقة</option>
+          </select>
+        </div>
+        <!-- مفتاح التوقيت الصيفي -->
+        <div class="flex flex-col justify-end">
+          <span class="text-[10px] font-bold text-slate-500 mb-1">نظام التوقيت الصيفي (DST):</span>
+          <button id="btn-toggle-dst" onclick="toggleDST()" class="flex items-center justify-between w-full bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl p-2.5 border border-slate-200 transition">
+            <span id="dst-status-text">توقيت شتوي (+2)</span>
+            <div class="w-8 h-4 bg-slate-300 rounded-full flex items-center p-0.5 transition" id="dst-toggle-bg">
+              <div class="bg-white w-3 h-3 rounded-full shadow transform translate-x-0 transition" id="dst-toggle-circle"></div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
     <!-- عرض مواقيت الصلاة لليوم الحالي -->
     <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
       <div class="flex justify-between items-center mb-4">
@@ -142,9 +188,9 @@
           <i data-lucide="clock" class="w-5 h-5 text-emerald-600"></i>
           <span>مواقيت الصلاة اليوم</span>
         </h3>
-        <!-- زر تحديث الموقع يدوياً -->
-        <button onclick="getUserLocation()" class="p-2 rounded-xl hover:bg-slate-100 text-emerald-700 transition" title="تحديث الموقع">
-          <i data-lucide="map-pin" class="w-4 h-4"></i>
+        <!-- زر تحديث الموقع يدوياً عبر الـ GPS -->
+        <button onclick="forceGPSRefresh()" class="p-2 rounded-xl hover:bg-slate-100 text-emerald-700 transition" title="تحديث الموقع الجغرافي">
+          <i data-lucide="locate" class="w-4 h-4"></i>
         </button>
       </div>
 
@@ -468,6 +514,31 @@
     let prayerTimers = {};
     let activeTab = 'main';
     let deferredPrompt = null;
+    let dstActive = false; // تفعيل التوقيت الصيفي افتراضياً (false)
+    let selectedCity = 'gps'; // الافتراضي تحديد تلقائي
+
+    // إحداثيات المدن والمحافظات المصرية الكبرى
+    const egyptCities = {
+      cairo: { name: "القاهرة", lat: 30.0444, lon: 31.2357 },
+      alexandria: { name: "الإسكندرية", lat: 31.2001, lon: 29.9187 },
+      giza: { name: "الجيزة", lat: 30.0131, lon: 31.2089 },
+      port_said: { name: "بورسعيد", lat: 31.2653, lon: 32.3019 },
+      suez: { name: "السويس", lat: 29.9668, lon: 32.5498 },
+      luxor: { name: "الأقصر", lat: 25.6872, lon: 32.6396 },
+      aswan: { name: "أسوان", lat: 24.0889, lon: 32.8998 },
+      tanta: { name: "طنطا", lat: 30.7865, lon: 31.0004 },
+      mansoura: { name: "المنصورة", lat: 31.0409, lon: 31.3785 },
+      asyut: { name: "أسيوط", lat: 27.1783, lon: 31.1859 },
+      zagazig: { name: "الزقازيق", lat: 30.5877, lon: 31.5101 },
+      fayoum: { name: "الفيوم", lat: 29.3084, lon: 30.8428 },
+      ismailia: { name: "الإسماعيلية", lat: 30.5965, lon: 32.2715 },
+      damietta: { name: "دمياط", lat: 31.4175, lon: 31.8144 },
+      sohag: { name: "سوهاج", lat: 26.5570, lon: 31.6948 },
+      minya: { name: "المنيا", lat: 28.0871, lon: 30.7618 },
+       Beni_suef: { name: "بني سويف", lat: 29.0744, lon: 31.0978 },
+      qena: { name: "قنا", lat: 26.1551, lon: 32.7160 },
+      hurghada: { name: "الغردقة", lat: 27.2579, lon: 33.8116 }
+    };
 
     // قائمة الأذكار المدمجة
     const athkarData = {
@@ -475,7 +546,7 @@
         { text: "آيَةُ الْكُرْسِيِّ: اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ...", count: 1, current: 0 },
         { text: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ...", count: 1, current: 0 },
         { text: "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ.", count: 1, current: 0 },
-        { text: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ: عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ.", count: 3, current: 0 },
+        { text: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ: عَدَدَ خَلْهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ.", count: 3, current: 0 },
         { text: "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ أَصْلِحْ لِي شأْنِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ.", count: 3, current: 0 }
       ],
       evening: [
@@ -516,7 +587,7 @@
     window.onload = function() {
       setupPWA();
       lucide.createIcons();
-      getUserLocation();
+      loadUserSettings(); // تحميل إعدادات التوقيت الصيفي والمدينة المفضلة
       updateTimesAndDates();
       setDailyHadith();
       initTracker();
@@ -529,7 +600,6 @@
 
     // ---------------- تهيئة وتوليد PWA ديناميكياً ----------------
     function setupPWA() {
-      // 1. إنشاء وحقن الـ Manifest ديناميكياً لتفادي الحاجة لملفات منفصلة على الموبايل
       const manifestObject = {
         name: "تطبيق ذاكر لمواقيت الصلاة",
         short_name: "ذاكر",
@@ -561,14 +631,12 @@
       link.href = manifestURL;
       document.head.appendChild(link);
 
-      // 2. تسجيل الـ Service Worker لتمكين الموبايل من قراءة الملف كلياً Off-line
       if ('serviceWorker' in navigator) {
         const swBlob = new Blob([`
           self.addEventListener('install', (e) => {
             self.skipWaiting();
           });
           self.addEventListener('fetch', (e) => {
-            // الاستجابة لطلبات المتصفح المحلية والإنترنت بكفاءة
             e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
           });
         `], { type: 'application/javascript' });
@@ -576,7 +644,6 @@
         navigator.serviceWorker.register(swURL).catch(err => console.log("SW Register failed: ", err));
       }
 
-      // 3. التقاط حدث التثبيت لإظهار بانر التحميل للهاتف
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
@@ -596,7 +663,82 @@
       });
     }
 
-    // تحديد الموقع التلقائي للمستخدم
+    // ---------------- تحميل وحفظ الإعدادات من الذاكرة المحلية ----------------
+    function loadUserSettings() {
+      // تحميل إعداد التوقيت الصيفي
+      const savedDST = localStorage.getItem('dst_active');
+      if (savedDST !== null) {
+        dstActive = savedDST === 'true';
+      } else {
+        // افتراض التوقيت الصيفي لو كنا في مايو 2026 (حيث تطبق مصر التوقيت الصيفي من أبريل لأكتوبر)
+        dstActive = true; 
+      }
+      updateDST_UI();
+
+      // تحميل إعداد المدينة المفضلة
+      const savedCity = localStorage.getItem('selected_city');
+      if (savedCity !== null) {
+        selectedCity = savedCity;
+      } else {
+        selectedCity = 'cairo'; // الافتراضي هو القاهرة لتفادي الأخطاء في البدء
+      }
+      document.getElementById('city-selector').value = selectedCity;
+
+      applyLocationAndCalculate();
+    }
+
+    // تطبيق الموقع الجغرافي والبدء بالحساب
+    function applyLocationAndCalculate() {
+      const locText = document.getElementById('current-location-text');
+      if (selectedCity === 'gps') {
+        getUserLocation();
+      } else {
+        const cityData = egyptCities[selectedCity];
+        if (cityData) {
+          userLatitude = cityData.lat;
+          userLongitude = cityData.lon;
+          locText.textContent = `مواقيت مدينة ${cityData.name} (يدويًا) | خط عرض ${userLatitude.toFixed(2)}`;
+          calculatePrayerTimes();
+        }
+      }
+    }
+
+    // تغيير المدينة من القائمة المنسدلة
+    function handleCityChange() {
+      const selector = document.getElementById('city-selector');
+      selectedCity = selector.value;
+      localStorage.setItem('selected_city', selectedCity);
+      applyLocationAndCalculate();
+      playBeep();
+    }
+
+    // تفعيل / إلغاء التوقيت الصيفي
+    function toggleDST() {
+      dstActive = !dstActive;
+      localStorage.setItem('dst_active', dstActive);
+      updateDST_UI();
+      calculatePrayerTimes();
+      playBeep();
+    }
+
+    // تحديث مظهر مفتاح التوقيت الصيفي
+    function updateDST_UI() {
+      const statusText = document.getElementById('dst-status-text');
+      const toggleBg = document.getElementById('dst-toggle-bg');
+      const toggleCircle = document.getElementById('dst-toggle-circle');
+
+      if (dstActive) {
+        statusText.textContent = 'توقيت صيفي نشط (+3)';
+        toggleBg.classList.replace('bg-slate-300', 'bg-amber-500');
+        toggleCircle.classList.replace('translate-x-0', 'translate-x-4');
+      } else {
+        statusText.textContent = 'توقيت شتوي نشط (+2)';
+        toggleBg.classList.replace('bg-amber-500', 'bg-slate-300');
+        toggleCircle.classList.replace('translate-x-4', 'translate-x-0');
+      }
+    }
+
+    // تحديث الموقع التلقائي عبر الـ GPS
     function getUserLocation() {
       const locText = document.getElementById('current-location-text');
       if (navigator.geolocation) {
@@ -604,28 +746,44 @@
           (position) => {
             userLatitude = position.coords.latitude;
             userLongitude = position.coords.longitude;
-            locText.textContent = `موقعك الحالي مفعّل بنجاح لتحديد المواقيت بدقة`;
+            locText.textContent = `تحديد تلقائي دقيق (GPS) | خط عرض ${userLatitude.toFixed(2)}`;
             calculatePrayerTimes();
           },
           (error) => {
-            locText.textContent = "القاهرة (الافتراضي) - يرجى تمكين موقع الهاتف للمواقيت الدقيقة";
-            calculatePrayerTimes();
+            locText.textContent = "فشل الـ GPS - تم تفعيل مواقيت القاهرة تلقائيًا";
+            // تحويل الاختيار للقاهرة
+            selectedCity = 'cairo';
+            document.getElementById('city-selector').value = 'cairo';
+            localStorage.setItem('selected_city', 'cairo');
+            applyLocationAndCalculate();
           }
         );
       } else {
-        locText.textContent = "تم اختيار القاهرة كافتراضي";
-        calculatePrayerTimes();
+        locText.textContent = "الـ GPS غير مدعوم - تم تفعيل مواقيت القاهرة تلقائيًا";
+        selectedCity = 'cairo';
+        document.getElementById('city-selector').value = 'cairo';
+        applyLocationAndCalculate();
       }
     }
 
+    // إجبار التحديث عبر الـ GPS عند الضغط على الأيقونة الدائرية
+    function forceGPSRefresh() {
+      selectedCity = 'gps';
+      document.getElementById('city-selector').value = 'gps';
+      localStorage.setItem('selected_city', 'gps');
+      applyLocationAndCalculate();
+      playBeep();
+    }
+
     // ---------------- حساب مواقيت الصلاة رياضياً بدقة ----------------
-    // حساب مواقيت الصلاة بناءً على نظام الهيئة العامة للمساحة المصرية
+    // حساب مواقيت الصلاة بناءً على الهيئة المصرية العامة للمساحة والمنطقة الزمنية المحددة يدوياً
     function calculatePrayerTimes() {
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth() + 1;
       const day = now.getDate();
 
+      // حساب رقم اليوم في السنة
       const N = Math.floor(275 * month / 9) - (Math.floor((month + 9) / 12) * (1 + Math.floor((year - 4 * Math.floor(year / 4) + 2) / 3))) + day - 30;
       
       const L = 4.877 + 0.0172 * N;
@@ -636,8 +794,12 @@
       const delta = Math.asin(Math.sin(epsilon) * Math.sin(lambda));
       const E = 9.87 * Math.sin(2 * lambda) - 7.53 * Math.cos(g) - 1.5 * Math.sin(g);
 
+      // الظهر بالتوقيت الشمسي المحلي
       const meridian = 12 - (userLongitude / 15) + (E / 60);
-      const timezone = 3; 
+      
+      // التوقيت الزمني لمصر: التوقيت الصيفي النشط (+3) والتوقيت الشتوي القياسي (+2)
+      const timezone = dstActive ? 3 : 2; 
+      
       const dhuhrTimeDecimal = meridian + timezone - (E / 60) + (userLongitude / 15);
       
       const latRad = userLatitude * Math.PI / 180;
@@ -651,6 +813,7 @@
         return Math.acos(cosH) * 180 / Math.PI;
       }
 
+      // حساب الزوايا المعتمدة في جمهورية مصر العربية والدول الإسلامية
       const fajrH = hourAngle(-19.5) / 15;
       const sunriseH = hourAngle(-0.833) / 15;
       const sunsetH = hourAngle(-0.833) / 15;
@@ -730,7 +893,7 @@
       }
 
       document.getElementById('next-prayer-name').innerHTML = `
-        <i data-lucide="bell" class="w-6 h-6 text-amber-500"></i>
+        <i data-lucide="bell" class="w-6 h-6 text-amber-500 animate-bounce"></i>
         <span>${prayerNames[nextPrayerKey]} (${formatTimeTo12Hour(targetTimeStr)})</span>
       `;
       
@@ -986,6 +1149,7 @@
       lucide.createIcons();
     }
 
+    // زيادة العداد الخاص بالذكر باللمس
     function incrementAthkarCount(type, index, btnElement) {
       const item = athkarData[type][index];
       if (item.current < item.count) {
@@ -1082,6 +1246,7 @@
       playBeep();
     }
 
+    // تحديث متتبع الصلوات
     function updateTrackerUI() {
       let completedCount = 0;
       const keys = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
