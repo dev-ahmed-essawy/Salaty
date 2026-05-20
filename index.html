@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>تطبيق ذاكر - مواقيت الصلاة والعبادات</title>
+  
+  <!-- تهيئة التطبيق للهواتف الذكية (iOS & Android Meta Tags) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#022c22">
+  <meta name="format-detection" content="telephone=no">
+  
+  <!-- أيقونة التطبيق لهواتف آيفون -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23022c22'/><path d='M50 20 L60 45 L90 50 L60 55 L50 80 L40 55 L10 50 L40 45 Z' fill='%23fbbf24'/></svg>">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Tajawal & Amiri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background-color: #f7f5f0; /* بيج هادئ مريح للعين */
+      /* دعم مساحات النوتش والـ Safe Areas للهواتف */
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .font-amiri {
+      font-family: 'Amiri', serif;
+    }
+    /* تأثيرات توهج خفيفة للأجواء الروحانية */
+    .glow-gold {
+      box-shadow: 0 0 15px rgba(217, 119, 6, 0.15);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+    }
+    /* إخفاء شريط التمرير الافتراضي لشعور تطبيق الموبايل الأصلي */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    /* تحسين التنقل السلس على الهواتف */
+    .ios-scroll {
+      -webkit-overflow-scrolling: touch;
+    }
+  </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col pb-24 md:pb-6">
+
+  <!-- رأس الصفحة والتاريخ الهجري -->
+  <header class="bg-emerald-950 text-amber-100 py-6 px-5 rounded-b-[2.5rem] shadow-lg relative overflow-hidden">
+    <!-- خلفية زخرفية إسلامية خفيفة جداً بالرسم المتجه -->
+    <div class="absolute inset-0 opacity-5 pointer-events-none flex justify-center items-center">
+      <svg width="400" height="400" viewBox="0 0 100 100" fill="currentColor">
+        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"/>
+      </svg>
+    </div>
+    
+    <div class="max-w-md mx-auto flex justify-between items-center relative z-10">
+      <div>
+        <h1 class="text-2xl font-black tracking-wide text-amber-400 flex items-center gap-2">
+          <i data-lucide="moon" class="w-6 h-6 fill-amber-400 animate-pulse"></i>
+          <span>ذاكِر</span>
+        </h1>
+        <p class="text-[10px] text-emerald-200 mt-1 max-w-[180px] truncate" id="current-location-text">جاري تحديد موقعك الحالي...</p>
+      </div>
+      <div class="text-left">
+        <div class="text-sm font-bold text-amber-300" id="header-hijri-date">١٥ ذو القعدة ١٤٤٧ هـ</div>
+        <div class="text-[11px] text-emerald-300" id="header-gregorian-date">الأربعاء، ٢٠ مايو ٢٠٢٦</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- زر التثبيت كتطبيق (يظهر تلقائياً على الهواتف الداعمة) -->
+  <div id="pwa-install-banner" class="hidden max-w-md mx-auto w-full px-4 mt-3">
+    <div class="bg-gradient-to-r from-emerald-800 to-emerald-950 text-white rounded-2xl p-4 shadow-md flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center text-emerald-950">
+          <i data-lucide="download" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold">ثبّت تطبيق "ذاكر" على هاتفك</h4>
+          <p class="text-[10px] text-emerald-200">لتصفح سريع وسهل بدون إنترنت</p>
+        </div>
+      </div>
+      <button onclick="installPWA()" class="bg-amber-400 hover:bg-amber-500 text-emerald-950 text-xs font-black px-4 py-2 rounded-xl transition duration-150">
+        تثبيت
+      </button>
+    </div>
+  </div>
+
+  <!-- المحتوى الرئيسي (متجاوب) -->
+  <main class="max-w-md mx-auto w-full px-4 mt-4 flex-1 space-y-4 ios-scroll">
+
+    <!-- ودجت الصلاة القادمة والوقت المتبقي -->
+    <section class="bg-white rounded-3xl p-5 shadow-sm border border-emerald-100/50 glow-emerald relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-2 h-full bg-emerald-600"></div>
+      <div class="flex justify-between items-start">
+        <div>
+          <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">الفرض القادم</span>
+          <h2 class="text-2xl font-black text-emerald-950 mt-2 flex items-center gap-2" id="next-prayer-name">
+            العصر
+          </h2>
+        </div>
+        <div class="text-left">
+          <span class="text-[10px] text-slate-500 block font-medium">الوقت المتبقي</span>
+          <span class="text-2xl font-bold text-amber-600 font-mono tracking-wider" id="next-prayer-countdown">02:14:35</span>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="bell" class="w-4 h-4 text-emerald-600"></i>
+          <span>تنبيه قبل الأذان:</span>
+          <select id="before-prayer-trigger" class="bg-slate-100 text-slate-800 font-bold rounded-lg px-2 py-1 focus:outline-none border border-slate-200 text-xs">
+            <option value="5">٥ د</option>
+            <option value="10">١٠ د</option>
+            <option value="15" selected>١٥ د</option>
+            <option value="20">٢٠ د</option>
+            <option value="30">٣٠ د</option>
+          </select>
+        </div>
+        <button onclick="toggleMuteAdhan()" id="btn-mute-adhan" class="flex items-center gap-1.5 bg-amber-50 text-amber-800 px-3 py-1.5 rounded-xl font-bold hover:bg-amber-100 transition text-xs">
+          <i data-lucide="volume-2" id="icon-mute-adhan" class="w-4 h-4"></i>
+          <span id="text-mute-adhan">صوت الأذان مفعل</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- عرض مواقيت الصلاة لليوم الحالي -->
+    <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm">
+          <i data-lucide="clock" class="w-5 h-5 text-emerald-600"></i>
+          <span>مواقيت الصلاة اليوم</span>
+        </h3>
+        <!-- زر تحديث الموقع يدوياً -->
+        <button onclick="getUserLocation()" class="p-2 rounded-xl hover:bg-slate-100 text-emerald-700 transition" title="تحديث الموقع">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- قائمة أوقات الصلوات -->
+      <div class="space-y-2.5" id="prayer-times-list">
+        <!-- الفجر -->
+        <div id="prayer-row-fajr" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 prayer-icon">
+              <i data-lucide="sun-dim" class="w-4 h-4"></i>
+            </div>
+            <span class="font-bold text-slate-700 text-sm">الفجر</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="font-mono font-bold text-base text-slate-700" id="time-fajr">04:12 ص</span>
+            <button onclick="togglePrayerNotification('fajr')" class="p-2 text-slate-400 hover:text-emerald-600" id="notif-fajr">
+              <i data-lucide="bell" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <!-- الشروق -->
+        <div id="prayer-row-sunrise" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition opacity-60">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
+              <i data-lucide="sunrise" class="w-4 h-4"></i>
+            </div>
+            <span class="font-bold text-slate-600 text-sm">الشروق</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="font-mono font-semibold text-slate-600 text-sm" id="time-sunrise">05:45 ص</span>
+            <div class="w-8"></div> <!-- حشو متناسق غياب الجرس للشروق -->
+          </div>
+        </div>
+        <!-- الظهر -->
+        <div id="prayer-row-dhuhr" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 prayer-icon">
+              <i data-lucide="sun" class="w-4 h-4"></i>
+            </div>
+            <span class="font-bold text-slate-700 text-sm">الظهر</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="font-mono font-bold text-base text-slate-700" id="time-dhuhr">11:53 ص</span>
+            <button onclick="togglePrayerNotification('dhuhr')" class="p-2 text-slate-400 hover:text-emerald-600" id="notif-dhuhr">
+              <i data-lucide="bell" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <!-- العصر -->
+        <div id="prayer-row-asr" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 prayer-icon">
+              <i data-lucide="cloud-sun" class="w-4 h-4"></i>
+            </div>
+            <span class="font-bold text-slate-700 text-sm">العصر</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="font-mono font-bold text-base text-slate-700" id="time-asr">03:28 م</span>
+            <button onclick="togglePrayerNotification('asr')" class="p-2 text-slate-400 hover:text-emerald-600" id="notif-asr">
+              <i data-lucide="bell" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <!-- المغرب -->
+        <div id="prayer-row-maghrib" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 prayer-icon">
+              <i data-lucide="sunset" class="w-4 h-4"></i>
+            </div>
+            <span class="font-bold text-slate-700 text-sm">المغرب</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="font-mono font-bold text-base text-slate-700" id="time-maghrib">06:01 م</span>
+            <button onclick="togglePrayerNotification('maghrib')" class="p-2 text-slate-400 hover:text-emerald-600" id="notif-maghrib">
+              <i data-lucide="bell" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <!-- العشاء -->
+        <div id="prayer-row-isha" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 prayer-icon">
+              <i data-lucide="moon-star" class="w-4 h-4"></i>
+            </div>
+            <span class="font-bold text-slate-700 text-sm">العشاء</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="font-mono font-bold text-base text-slate-700" id="time-isha">07:22 م</span>
+            <button onclick="togglePrayerNotification('isha')" class="p-2 text-slate-400 hover:text-emerald-600" id="notif-isha">
+              <i data-lucide="bell" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- الحديث النبوي اليومي -->
+    <section class="bg-amber-50 rounded-3xl p-5 border border-amber-100/60 shadow-sm relative overflow-hidden">
+      <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-100 rounded-full opacity-30 flex items-center justify-center">
+        <span class="font-amiri text-amber-300 text-6xl">ﷺ</span>
+      </div>
+      <div class="flex gap-2 items-center text-amber-800 font-bold mb-2">
+        <i data-lucide="quote" class="w-5 h-5"></i>
+        <span>الحديث اليومي الصحيح</span>
+      </div>
+      <p class="font-amiri text-[15px] text-slate-800 leading-relaxed text-justify" id="daily-hadith-text">
+        "إنَّما الأعْمالُ بالنِّيَّاتِ، وإنَّما لِكُلِّ امْرِئٍ ما نَوَى، فمَن كانَتْ هِجْرَتُهُ إلى اللَّهِ ورَسولِهِ فهِجْرَتُهُ إلى اللَّهِ ورَسولِهِ..."
+      </p>
+      <div class="mt-3 text-left">
+        <span class="text-[10px] text-amber-700 bg-amber-100/50 px-2.5 py-1 rounded-lg font-bold" id="daily-hadith-rawi">رواه البخاري ومسلم</span>
+      </div>
+    </section>
+
+    <!-- منبه صيام النوافل والسنن -->
+    <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+      <h3 class="font-bold text-slate-800 flex items-center gap-2 mb-3 text-sm">
+        <i data-lucide="calendar-heart" class="w-5 h-5 text-emerald-600"></i>
+        <span>تنبيه صيام النوافل والسنن</span>
+      </h3>
+      <div class="space-y-3">
+        <!-- الاثنين والخميس -->
+        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-100">
+          <div>
+            <span class="text-xs font-bold text-slate-700 block">صيام الإثنين والخميس</span>
+            <span class="text-[10px] text-slate-500" id="fasting-mon-thu-status">التذكير القادم: الأحد مساءً</span>
+          </div>
+          <button id="btn-toggle-fast-mon-thu" onclick="toggleFastingReminder('mon-thu')" class="w-11 h-6 bg-emerald-600 rounded-full flex items-center p-1 transition-colors duration-200">
+            <div class="bg-white w-4 h-4 rounded-full shadow-md transform translate-x-5 transition-transform duration-200" id="toggle-circle-mon-thu"></div>
+          </button>
+        </div>
+        <!-- الأيام البيض -->
+        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-100">
+          <div>
+            <span class="text-xs font-bold text-slate-700 block">صيام الأيام البيض (١٣، ١٤، ١٥)</span>
+            <span class="text-[10px] text-slate-500" id="fasting-white-status">من كل شهر هجري</span>
+          </div>
+          <button id="btn-toggle-fast-white" onclick="toggleFastingReminder('white')" class="w-11 h-6 bg-emerald-600 rounded-full flex items-center p-1 transition-colors duration-200">
+            <div class="bg-white w-4 h-4 rounded-full shadow-md transform translate-x-5 transition-transform duration-200" id="toggle-circle-white"></div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- متتبع الصلاة اليومي -->
+    <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm">
+          <i data-lucide="clipboard-check" class="w-5 h-5 text-emerald-600"></i>
+          <span>متتبع صلوات اليوم</span>
+        </h3>
+        <span class="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full animate-pulse" id="tracker-percentage">0% مكتمل</span>
+      </div>
+      <!-- الأزرار التفاعلية للمتتبع -->
+      <div class="grid grid-cols-5 gap-2">
+        <button id="track-fajr" onclick="toggleTrack('fajr')" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition active:scale-95">
+          <span class="text-[10px] text-slate-500 mb-1 font-bold">الفجر</span>
+          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400" id="track-icon-fajr">
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </div>
+        </button>
+        <button id="track-dhuhr" onclick="toggleTrack('dhuhr')" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition active:scale-95">
+          <span class="text-[10px] text-slate-500 mb-1 font-bold">الظهر</span>
+          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400" id="track-icon-dhuhr">
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </div>
+        </button>
+        <button id="track-asr" onclick="toggleTrack('asr')" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition active:scale-95">
+          <span class="text-[10px] text-slate-500 mb-1 font-bold">العصر</span>
+          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400" id="track-icon-asr">
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </div>
+        </button>
+        <button id="track-maghrib" onclick="toggleTrack('maghrib')" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition active:scale-95">
+          <span class="text-[10px] text-slate-500 mb-1 font-bold">المغرب</span>
+          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400" id="track-icon-maghrib">
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </div>
+        </button>
+        <button id="track-isha" onclick="toggleTrack('isha')" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition active:scale-95">
+          <span class="text-[10px] text-slate-500 mb-1 font-bold">العشاء</span>
+          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400" id="track-icon-isha">
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </div>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- شريط القائمة السفلي للتنقل السريع المريح جداً لإصبع الإبهام على الموبايل -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 pb-5 pt-3 px-6 flex justify-around items-center z-40 rounded-t-[2rem] shadow-[0_-5px_25px_rgba(0,0,0,0.06)] max-w-md mx-auto">
+    <button onclick="switchTab('main')" id="tab-main-btn" class="flex flex-col items-center gap-1.5 text-emerald-700 active:scale-95 transition">
+      <i data-lucide="home" class="w-5.5 h-5.5"></i>
+      <span class="text-[10px] font-bold">الرئيسية</span>
+    </button>
+    <button onclick="switchTab('athkar')" id="tab-athkar-btn" class="flex flex-col items-center gap-1.5 text-slate-400 active:scale-95 transition">
+      <i data-lucide="book-open" class="w-5.5 h-5.5"></i>
+      <span class="text-[10px] font-bold">الأذكار</span>
+    </button>
+    <button onclick="switchTab('qibla')" id="tab-qibla-btn" class="flex flex-col items-center gap-1.5 text-slate-400 active:scale-95 transition">
+      <i data-lucide="compass" class="w-5.5 h-5.5"></i>
+      <span class="text-[10px] font-bold">القبلة</span>
+    </button>
+    <button onclick="switchTab('duas')" id="tab-duas-btn" class="flex flex-col items-center gap-1.5 text-slate-400 active:scale-95 transition">
+      <i data-lucide="heart-handshake" class="w-5.5 h-5.5"></i>
+      <span class="text-[10px] font-bold">الأدعية</span>
+    </button>
+  </nav>
+
+  <!-- ==================== الشاشات المنبثقة والصفحات البديلة ==================== -->
+
+  <!-- صفحة الأذكار -->
+  <div id="tab-athkar" class="hidden max-w-md mx-auto w-full px-4 mt-4 space-y-4 pb-28 ios-scroll">
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+      <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <i data-lucide="book-open" class="w-5.5 h-5.5 text-emerald-600"></i>
+        <span>حصن المسلم - الأذكار اليومية</span>
+      </h2>
+      
+      <!-- اختيار نوع الذكر -->
+      <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <button onclick="filterAthkar('morning')" id="athkar-btn-morning" class="bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap">أذكار الصباح</button>
+        <button onclick="filterAthkar('evening')" id="athkar-btn-evening" class="bg-slate-100 text-slate-600 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap">أذكار المساء</button>
+        <button onclick="filterAthkar('after_prayer')" id="athkar-btn-after_prayer" class="bg-slate-100 text-slate-600 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap">الأذكار بعد الصلاة</button>
+      </div>
+
+      <!-- محتوى الأذكار المتغير -->
+      <div class="mt-4 space-y-4" id="athkar-items-container">
+        <!-- تضاف الأذكار برمجياً هنا -->
+      </div>
+    </div>
+  </div>
+
+  <!-- صفحة القبلة -->
+  <div id="tab-qibla" class="hidden max-w-md mx-auto w-full px-4 mt-4 space-y-4 pb-28 text-center ios-scroll">
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col items-center">
+      <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2 justify-center">
+        <i data-lucide="compass" class="w-5.5 h-5.5 text-emerald-600"></i>
+        <span>تحديد اتجاه القبلة الكعبة المشرفة</span>
+      </h2>
+      <p class="text-[11px] text-slate-500 mb-6">ضع هاتفك على سطح مستوٍ وقم بتدويره للوصول للاتجاه الصحيح</p>
+
+      <!-- البوصلة التفاعلية -->
+      <div class="relative w-64 h-64 my-6 flex items-center justify-center">
+        <!-- قرص البوصلة -->
+        <div id="compass-disc" class="absolute w-full h-full rounded-full border-4 border-emerald-950 flex items-center justify-center transition-transform duration-150 ease-out" style="transform: rotate(0deg);">
+          <!-- علامة الشمال N -->
+          <span class="absolute top-2 font-bold text-lg text-rose-600">N</span>
+          <!-- علامة الشرق E -->
+          <span class="absolute right-3 font-bold text-xs text-slate-400">E</span>
+          <!-- علامة الجنوب S -->
+          <span class="absolute bottom-2 font-bold text-xs text-slate-400">S</span>
+          <!-- علامة الغرب W -->
+          <span class="absolute left-3 font-bold text-xs text-slate-400">W</span>
+
+          <!-- اتجاه مكة من الداخل كرمز سهم إضافي -->
+          <div class="absolute w-12 h-12 flex items-center justify-center" id="makkah-arrow-container" style="transform: rotate(135deg);">
+            <i data-lucide="send" class="w-8 h-8 text-amber-500 fill-amber-500 transform rotate-45"></i>
+          </div>
+        </div>
+
+        <!-- مؤشر الهاتف أو الاتجاه الفعلي للقبلة -->
+        <div class="absolute z-10 text-emerald-950 flex flex-col items-center">
+          <i data-lucide="navigation" class="w-12 h-12 text-emerald-700 fill-emerald-700 filter drop-shadow"></i>
+        </div>
+      </div>
+
+      <div class="bg-emerald-50 text-emerald-900 rounded-2xl p-4 w-full mt-4 text-sm font-medium">
+        <span class="block text-xs text-emerald-700 mb-1">الزاوية الجغرافية للقبلة</span>
+        <span class="text-xl font-bold font-mono" id="qibla-angle-display">135°</span>
+        <span class="block text-[10px] text-slate-500 mt-2" id="qibla-sensor-message">جاري تشغيل حساسات الاتجاه في هاتفك...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- صفحة الأدعية الصحيحة الثابتة -->
+  <div id="tab-duas" class="hidden max-w-md mx-auto w-full px-4 mt-4 space-y-4 pb-28 ios-scroll">
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
+      <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+        <i data-lucide="heart-handshake" class="w-5.5 h-5.5 text-emerald-600"></i>
+        <span>جوامع الأدعية الصحيحة الثابتة</span>
+      </h2>
+
+      <div class="space-y-4" id="duas-list-container">
+        <!-- تعبأ الأدعية تلقائياً -->
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة التنبيه المخصصة للأشعار والإشعارات (محاكاة إشعار الهاتف والأذان) -->
+  <div id="custom-notification-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-[2rem] p-6 max-w-xs w-full text-center shadow-2xl border border-amber-100 animate-in fade-in zoom-in-95 duration-200">
+      <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600">
+        <i data-lucide="bell" class="w-8 h-8 animate-bounce"></i>
+      </div>
+      <h4 class="text-lg font-bold text-emerald-950 mb-1" id="notif-modal-title">تنبيه الصلاة</h4>
+      <p class="text-xs text-slate-600 mb-6" id="notif-modal-body">حان الآن موعد أذان العصر حسب توقيت القاهرة</p>
+      
+      <div class="space-y-2">
+        <button onclick="stopAdhanAudio()" class="w-full bg-emerald-700 text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-emerald-800 transition active:scale-95 text-sm">
+          إيقاف الأذان / حسناً
+        </button>
+        <button onclick="closeNotificationModal()" class="w-full bg-slate-100 text-slate-600 font-bold py-2.5 rounded-2xl hover:bg-slate-200 transition text-xs active:scale-95">
+          إغلاق
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- مكون لتشغيل الأذان الصوتي -->
+  <audio id="adhan-player" src="https://www.islamcan.com/adhan/adhan1.mp3" preload="auto"></audio>
+  <audio id="beep-player" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-700.wav" preload="auto"></audio>
+
+  <!-- ==================== منطق جافا سكريبت المتكامل للميزات ==================== -->
+  <script>
+    // ---------------- الإعدادات العامة والبيانات الثابتة ----------------
+    let userLatitude = 30.0444;  // الافتراضي: القاهرة
+    let userLongitude = 31.2357; // الافتراضي: القاهرة
+    let adhanMuted = false;
+    let alarmMinutesBefore = 15;
+    let prayerTimers = {};
+    let activeTab = 'main';
+    let deferredPrompt = null;
+
+    // قائمة الأذكار المدمجة
+    const athkarData = {
+      morning: [
+        { text: "آيَةُ الْكُرْسِيِّ: اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ...", count: 1, current: 0 },
+        { text: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ...", count: 1, current: 0 },
+        { text: "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ.", count: 1, current: 0 },
+        { text: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ: عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ.", count: 3, current: 0 },
+        { text: "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ أَصْلِحْ لِي شأْنِي كُلَّهُ وَلَا تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ.", count: 3, current: 0 }
+      ],
+      evening: [
+        { text: "آيَةُ الْكُرْسِيِّ: اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...", count: 1, current: 0 },
+        { text: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ...", count: 1, current: 0 },
+        { text: "اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ الْمَصِيرُ.", count: 1, current: 0 },
+        { text: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ...", count: 1, current: 0 },
+        { text: "أَعُوذُ بِكَلِمَاتِ اللهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ.", count: 3, current: 0 }
+      ],
+      after_prayer: [
+        { text: "أَسْتَغْفِرُ اللهَ (ثلاثاً)، اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ.", count: 1, current: 0 },
+        { text: "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ...", count: 1, current: 0 },
+        { text: "سُبْحَانَ اللهِ (33 مرة)، الْحَمْدُ للهِ (33 مرة)، اللهُ أَكْبَرُ (33 مرة).", count: 33, current: 0 },
+        { text: "تَمَامُ الْمِائَةِ: لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ.", count: 1, current: 0 }
+      ]
+    };
+
+    // قائمة الأدعية الصحيحة الثابتة
+    const duasData = [
+      { text: "اللَّهُمَّ رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ.", source: "متفق عليه" },
+      { text: "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْعَجْزِ وَالْكَسَلِ، وَالْجُبْنِ وَالْهَرَمِ وَالْبُخْلِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ...", source: "رواه مسلم" },
+      { text: "اللَّهُمَّ إنِّي أَسْأَلُكَ الهُدَى وَالتُّقَى، وَالعَفَافَ وَالغِنَى.", source: "رواه مسلم" },
+      { text: "يَا مُقَلِّبَ الْقُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ.", source: "رواه الترمذي وصححه الألباني" },
+      { text: "اللَّهُمَّ إنَّكَ عَفُوٌّ تُحِبُّ العَفْوَ فَاعْفُ عَنِّي.", source: "رواه الترمذي وصححه الألباني" }
+    ];
+
+    // قائمة الأحاديث الصحيحة من البخاري ومسلم
+    const hadithsList = [
+      { text: "إنَّما الأعْمالُ بالنِّيَّاتِ، وإنَّما لِكُلِّ امْرِئٍ ما نَوَى، فمَن كانَتْ هِجْرَتُهُ إلى اللَّهِ ورَسولِهِ فهِجْرَتُهُ إلى اللَّهِ ورَسولِهِ، ومَن كانَتْ هِجْرَتُهُ لِدُنْيا يُصِيبُها، أوِ امْرَأَةٍ يَنْكِحُها، فهِجْرَتُهُ إلى ما هاجَرَ إلَيْهِ.", rawi: "رواه البخاري ومسلم" },
+      { text: "مَن سَلَكَ طَرِيقًا يَلْتَمِسُ فيه عِلْمًا، سَهَّلَ اللَّهُ له به طَرِيقًا إلى الجَنَّةِ.", rawi: "رواه مسلم" },
+      { text: "المُسْلِمُ مَن سَلِمَ المُسْلِمُونَ مِن لِسانِهِ ويَدِهِ، والمُهاجِرُ مَن هَجَرَ ما نَهَى اللَّهُ عنه.", rawi: "رواه البخاري" },
+      { text: "آيَةُ المُنَافِقِ ثَلَاثٌ: إذَا حَدَّثَ كَذَبَ، وإذَا وعَدَ أخْلَفَ، وإذَا اؤْتُمِنَ خَانَ.", rawi: "رواه البخاري ومسلم" },
+      { text: "مَن كانَ يُؤْمِنُ باللَّهِ والْيَومِ الآخِرِ فَلْيَقُلْ خَيْرًا أوْ لِيَصْمُتْ، ومَن كانَ يُؤْمِنُ باللَّهِ والْيَومِ الآخِرِ فَلْيُكْرِمْ جارَهُ.", rawi: "رواه البخاري ومسلم" },
+      { text: "الْمُؤْمِنُ القَوِيُّ، خَيْرٌ وَأَحَبُّ إلَى اللهِ مِنَ المُؤْمِنِ الضَّعِيفِ، وفي كُلٍّ خَيْرٌ احْرِصْ علَى ما يَنْفَعُكَ، وَاسْتَعِنْ باللَّهِ وَلَا تَعْجِزْ.", rawi: "رواه مسلم" }
+    ];
+
+    // ---------------- تشغيل وإعداد التطبيق ----------------
+    window.onload = function() {
+      setupPWA();
+      lucide.createIcons();
+      getUserLocation();
+      updateTimesAndDates();
+      setDailyHadith();
+      initTracker();
+      loadNotificationSettings();
+      initFastingReminders();
+      
+      // بدء فحص الوقت كل ثانية للتنبيهات والعد التنازلي
+      setInterval(runAppClock, 1000);
+    };
+
+    // ---------------- تهيئة وتوليد PWA ديناميكياً ----------------
+    function setupPWA() {
+      // 1. إنشاء وحقن الـ Manifest ديناميكياً لتفادي الحاجة لملفات منفصلة على الموبايل
+      const manifestObject = {
+        name: "تطبيق ذاكر لمواقيت الصلاة",
+        short_name: "ذاكر",
+        description: "تطبيق إسلامي لمواقيت الصلاة والأذكار والقبلة وتتبع السنن",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#f7f5f0",
+        theme_color: "#022c22",
+        orientation: "portrait",
+        icons: [
+          {
+            src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23022c22'/><path d='M50 20 L60 45 L90 50 L60 55 L50 80 L40 55 L10 50 L40 45 Z' fill='%23fbbf24'/></svg>",
+            sizes: "192x192",
+            type: "image/svg+xml"
+          },
+          {
+            src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23022c22'/><path d='M50 20 L60 45 L90 50 L60 55 L50 80 L40 55 L10 50 L40 45 Z' fill='%23fbbf24'/></svg>",
+            sizes: "512x512",
+            type: "image/svg+xml"
+          }
+        ]
+      };
+
+      const manifestStr = JSON.stringify(manifestObject);
+      const blob = new Blob([manifestStr], { type: 'application/json' });
+      const manifestURL = URL.createObjectURL(blob);
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = manifestURL;
+      document.head.appendChild(link);
+
+      // 2. تسجيل الـ Service Worker لتمكين الموبايل من قراءة الملف كلياً Off-line
+      if ('serviceWorker' in navigator) {
+        const swBlob = new Blob([`
+          self.addEventListener('install', (e) => {
+            self.skipWaiting();
+          });
+          self.addEventListener('fetch', (e) => {
+            // الاستجابة لطلبات المتصفح المحلية والإنترنت بكفاءة
+            e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+          });
+        `], { type: 'application/javascript' });
+        const swURL = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swURL).catch(err => console.log("SW Register failed: ", err));
+      }
+
+      // 3. التقاط حدث التثبيت لإظهار بانر التحميل للهاتف
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('pwa-install-banner').classList.remove('hidden');
+      });
+    }
+
+    function installPWA() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        }
+        document.getElementById('pwa-install-banner').classList.add('hidden');
+        deferredPrompt = null;
+      });
+    }
+
+    // تحديد الموقع التلقائي للمستخدم
+    function getUserLocation() {
+      const locText = document.getElementById('current-location-text');
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            userLatitude = position.coords.latitude;
+            userLongitude = position.coords.longitude;
+            locText.textContent = `موقعك الحالي مفعّل بنجاح لتحديد المواقيت بدقة`;
+            calculatePrayerTimes();
+          },
+          (error) => {
+            locText.textContent = "القاهرة (الافتراضي) - يرجى تمكين موقع الهاتف للمواقيت الدقيقة";
+            calculatePrayerTimes();
+          }
+        );
+      } else {
+        locText.textContent = "تم اختيار القاهرة كافتراضي";
+        calculatePrayerTimes();
+      }
+    }
+
+    // ---------------- حساب مواقيت الصلاة رياضياً بدقة ----------------
+    // حساب مواقيت الصلاة بناءً على نظام الهيئة العامة للمساحة المصرية
+    function calculatePrayerTimes() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const day = now.getDate();
+
+      const N = Math.floor(275 * month / 9) - (Math.floor((month + 9) / 12) * (1 + Math.floor((year - 4 * Math.floor(year / 4) + 2) / 3))) + day - 30;
+      
+      const L = 4.877 + 0.0172 * N;
+      const g = 6.240 + 0.0172 * N;
+      const lambda = L + 0.033 * Math.sin(g);
+      
+      const epsilon = 0.409 - 0.0001 * N;
+      const delta = Math.asin(Math.sin(epsilon) * Math.sin(lambda));
+      const E = 9.87 * Math.sin(2 * lambda) - 7.53 * Math.cos(g) - 1.5 * Math.sin(g);
+
+      const meridian = 12 - (userLongitude / 15) + (E / 60);
+      const timezone = 3; 
+      const dhuhrTimeDecimal = meridian + timezone - (E / 60) + (userLongitude / 15);
+      
+      const latRad = userLatitude * Math.PI / 180;
+      const decRad = delta;
+
+      function hourAngle(angle) {
+        const angleRad = angle * Math.PI / 180;
+        const cosH = (Math.sin(angleRad) - Math.sin(latRad) * Math.sin(decRad)) / (Math.cos(latRad) * Math.cos(decRad));
+        if (cosH > 1) return 0;
+        if (cosH < -1) return Math.PI;
+        return Math.acos(cosH) * 180 / Math.PI;
+      }
+
+      const fajrH = hourAngle(-19.5) / 15;
+      const sunriseH = hourAngle(-0.833) / 15;
+      const sunsetH = hourAngle(-0.833) / 15;
+      const ishaH = hourAngle(-17.5) / 15;
+
+      const asrAngle = Math.atan(1 + Math.tan(Math.abs(latRad - decRad)));
+      const asrH = hourAngle(90 - (asrAngle * 180 / Math.PI)) / 15;
+
+      const prayers = {
+        fajr: formatDecimalTime(dhuhrTimeDecimal - fajrH),
+        sunrise: formatDecimalTime(dhuhrTimeDecimal - sunriseH),
+        dhuhr: formatDecimalTime(dhuhrTimeDecimal),
+        asr: formatDecimalTime(dhuhrTimeDecimal + asrH),
+        maghrib: formatDecimalTime(dhuhrTimeDecimal + sunsetH),
+        isha: formatDecimalTime(dhuhrTimeDecimal + ishaH)
+      };
+
+      document.getElementById('time-fajr').textContent = formatTimeTo12Hour(prayers.fajr);
+      document.getElementById('time-sunrise').textContent = formatTimeTo12Hour(prayers.sunrise);
+      document.getElementById('time-dhuhr').textContent = formatTimeTo12Hour(prayers.dhuhr);
+      document.getElementById('time-asr').textContent = formatTimeTo12Hour(prayers.asr);
+      document.getElementById('time-maghrib').textContent = formatTimeTo12Hour(prayers.maghrib);
+      document.getElementById('time-isha').textContent = formatTimeTo12Hour(prayers.isha);
+
+      window.calculatedPrayers = prayers;
+    }
+
+    function formatDecimalTime(decimal) {
+      let hours = Math.floor(decimal);
+      let minutes = Math.round((decimal - hours) * 60);
+      if (minutes === 60) {
+        hours += 1;
+        minutes = 0;
+      }
+      if (hours >= 24) hours -= 24;
+      if (hours < 0) hours += 24;
+      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    }
+
+    function formatTimeTo12Hour(time24) {
+      const parts = time24.split(':');
+      let hours = parseInt(parts[0]);
+      const minutes = parts[1];
+      const ampm = hours >= 12 ? 'م' : 'ص';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      return `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+    }
+
+    // ---------------- التحديث المستمر لودجت الصلاة والعد التنازلي ----------------
+    function runAppClock() {
+      if (!window.calculatedPrayers) return;
+
+      const now = new Date();
+      
+      const prayerNames = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
+      let nextPrayerKey = 'fajr';
+      let minDiff = Infinity;
+      let targetTimeStr = '';
+
+      for (let key in prayerNames) {
+        const prayerTimeParts = window.calculatedPrayers[key].split(':');
+        const prayerDate = new Date();
+        prayerDate.setHours(parseInt(prayerTimeParts[0]), parseInt(prayerTimeParts[1]), 0);
+
+        let diff = prayerDate.getTime() - now.getTime();
+        if (diff < 0) {
+          prayerDate.setDate(prayerDate.getDate() + 1);
+          diff = prayerDate.getTime() - now.getTime();
+        }
+
+        if (diff < minDiff) {
+          minDiff = diff;
+          nextPrayerKey = key;
+          targetTimeStr = window.calculatedPrayers[key];
+        }
+      }
+
+      document.getElementById('next-prayer-name').innerHTML = `
+        <i data-lucide="bell" class="w-6 h-6 text-amber-500"></i>
+        <span>${prayerNames[nextPrayerKey]} (${formatTimeTo12Hour(targetTimeStr)})</span>
+      `;
+      
+      const hoursLeft = Math.floor(minDiff / 3600000);
+      const minutesLeft = Math.floor((minDiff % 3600000) / 60000);
+      const secondsLeft = Math.floor((minDiff % 60000) / 1000);
+      
+      document.getElementById('next-prayer-countdown').textContent = 
+        `${String(hoursLeft).padStart(2, '0')}:${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
+
+      // تحديد وتوهج الصف الحالي للصلاة
+      for (let key in prayerNames) {
+        const row = document.getElementById(`prayer-row-${key}`);
+        if (row) {
+          row.classList.remove('bg-emerald-50', 'border-emerald-200', 'scale-[1.01]');
+          const iconDiv = row.querySelector('.prayer-icon');
+          if (iconDiv) iconDiv.classList.replace('bg-emerald-600', 'bg-slate-100');
+          if (iconDiv) iconDiv.classList.replace('text-white', 'text-slate-600');
+        }
+      }
+      
+      const nextRow = document.getElementById(`prayer-row-${nextPrayerKey}`);
+      if (nextRow) {
+        nextRow.classList.add('bg-emerald-50/70', 'border-emerald-200/60', 'scale-[1.01]');
+        const nextIconDiv = nextRow.querySelector('.prayer-icon');
+        if (nextIconDiv) {
+          nextIconDiv.classList.replace('bg-slate-100', 'bg-emerald-600');
+          nextIconDiv.classList.replace('text-slate-600', 'text-white');
+        }
+      }
+
+      checkAdhanAndPreAlerts(now, nextPrayerKey, minDiff);
+    }
+
+    // ---------------- نظام تنبيهات الأذان والإنذار المبكر الذكي ----------------
+    let lastAlertedPrayer = '';
+    let lastPreAlertedPrayer = '';
+    let lastAthkarAlertedPrayer = '';
+
+    function checkAdhanAndPreAlerts(now, nextPrayerKey, minDiff) {
+      const triggerMs = alarmMinutesBefore * 60 * 1000;
+      if (minDiff <= triggerMs && minDiff > (triggerMs - 5000) && lastPreAlertedPrayer !== nextPrayerKey) {
+        lastPreAlertedPrayer = nextPrayerKey;
+        triggerPrePrayerNotification(nextPrayerKey);
+      }
+
+      if (minDiff <= 2000 && lastAlertedPrayer !== nextPrayerKey) {
+        lastAlertedPrayer = nextPrayerKey;
+        triggerAdhan(nextPrayerKey);
+      }
+
+      const lastPrayerKey = getLastPrayerKey(nextPrayerKey);
+      const lastPrayerTimeParts = window.calculatedPrayers[lastPrayerKey].split(':');
+      const lastPrayerDate = new Date();
+      lastPrayerDate.setHours(parseInt(lastPrayerTimeParts[0]), parseInt(lastPrayerTimeParts[1]), 0);
+      
+      let elapsed = now.getTime() - lastPrayerDate.getTime();
+      if (elapsed < 0) {
+        lastPrayerDate.setDate(lastPrayerDate.getDate() - 1);
+        elapsed = now.getTime() - lastPrayerDate.getTime();
+      }
+
+      const tenMinutesInMs = 10 * 60 * 1000;
+      if (elapsed >= tenMinutesInMs && elapsed < (tenMinutesInMs + 5000) && lastAthkarAlertedPrayer !== lastPrayerKey) {
+        lastAthkarAlertedPrayer = lastPrayerKey;
+        triggerPostPrayerAthkarNotification(lastPrayerKey);
+      }
+    }
+
+    function getLastPrayerKey(nextKey) {
+      const order = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+      let idx = order.indexOf(nextKey);
+      if (idx === 0) return 'isha';
+      return order[idx - 1];
+    }
+
+    function triggerPrePrayerNotification(prayerKey) {
+      const prayerNames = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
+      const name = prayerNames[prayerKey];
+      playBeep();
+      showCustomModal(
+        `تنبيه مسبق للعبادة`,
+        `متبقي ${alarmMinutesBefore} دقيقة على صلاة ${name}. استعد للوضوء والصلاة يا أخي الكريم.`
+      );
+    }
+
+    function triggerAdhan(prayerKey) {
+      const prayerNames = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
+      const name = prayerNames[prayerKey];
+
+      if (!adhanMuted) {
+        const adhanPlayer = document.getElementById('adhan-player');
+        if (adhanPlayer) {
+          adhanPlayer.currentTime = 0;
+          adhanPlayer.play().catch(e => console.log("Adhan failed (browser gesture check)"));
+        }
+      }
+
+      showCustomModal(
+        `حان الآن موعد الأذان`,
+        `الله أكبر، الله أكبر.. حان الآن وقت صلاة ${name} حسب توقيتك المحلي.`
+      );
+    }
+
+    function triggerPostPrayerAthkarNotification(prayerKey) {
+      const prayerNames = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
+      let title = `تنبيه الأذكار بعد الصلاة`;
+      let body = `مضت ١٠ دقائق على صلاة ${prayerNames[prayerKey]}. اضغط هنا لقراءة أذكار ما بعد الصلاة المباركة.`;
+
+      if (prayerKey === 'fajr') {
+        title = `تذكير أذكار الصباح ☀️`;
+        body = `صباحك مبارك! اضغط هنا لفتح وقراءة أذكار الصباح الكاملة لحفظك وتحصينك اليوم.`;
+      } else if (prayerKey === 'asr') {
+        title = `تذكير أذكار المساء 🌙`;
+        body = `مساءك معطر بذكر الله! اضغط هنا لقراءة أذكار المساء الحامية والنافعة.`;
+      }
+
+      playBeep();
+      showCustomModal(title, body, () => {
+        switchTab('athkar');
+        if (prayerKey === 'fajr') {
+          filterAthkar('morning');
+        } else if (prayerKey === 'asr') {
+          filterAthkar('evening');
+        } else {
+          filterAthkar('after_prayer');
+        }
+      });
+    }
+
+    // ---------------- نظام القبلة التفاعلي للهواتف الذكية ----------------
+    function initQibla() {
+      const qiblaAngle = 135; 
+      document.getElementById('qibla-angle-display').textContent = `${qiblaAngle}° (جنوب شرق)`;
+
+      const compassDisc = document.getElementById('compass-disc');
+      const sensorMsg = document.getElementById('qibla-sensor-message');
+
+      if (window.DeviceOrientationEvent) {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          DeviceOrientationEvent.requestPermission()
+            .then(permissionState => {
+              if (permissionState === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+              } else {
+                sensorMsg.textContent = "تم رفض إذن الحساس. اعتمد على تدوير البوصلة يدوياً.";
+                simulateCompassRotation();
+              }
+            })
+            .catch(err => {
+              sensorMsg.textContent = "يرجى تحريك الهاتف لتنشيط اتجاه القبلة التلقائي.";
+              simulateCompassRotation();
+            });
+        } else {
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      } else {
+        sensorMsg.textContent = "مستشعر الاتجاه غير مدعوم في متصفحك. تم تنشيط وضع المحاكاة.";
+        simulateCompassRotation();
+      }
+
+      function handleOrientation(event) {
+        let heading = event.webkitCompassHeading || Math.abs(event.alpha - 360);
+        if (heading === undefined) heading = 0;
+        compassDisc.style.transform = `rotate(${-heading}deg)`;
+        sensorMsg.textContent = `الحساس يعمل بنجاح! اتجاه هاتفك الحالي: ${Math.round(heading)}°`;
+      }
+
+      function simulateCompassRotation() {
+        let angle = 0;
+        setInterval(() => {
+          angle = (angle + 1) % 360;
+          compassDisc.style.transform = `rotate(${-angle}deg)`;
+        }, 120);
+      }
+    }
+
+    // ---------------- معالجة شاشات التبويب السفلية ----------------
+    function switchTab(tabId) {
+      activeTab = tabId;
+      
+      document.querySelector('main').classList.add('hidden');
+      document.getElementById('tab-athkar').classList.add('hidden');
+      document.getElementById('tab-qibla').classList.add('hidden');
+      document.getElementById('tab-duas').classList.add('hidden');
+
+      const btns = ['main-btn', 'athkar-btn', 'qibla-btn', 'duas-btn'];
+      btns.forEach(id => {
+        const btn = document.getElementById(`tab-${id}`);
+        if (btn) {
+          btn.classList.remove('text-emerald-700');
+          btn.classList.add('text-slate-400');
+        }
+      });
+
+      if (tabId === 'main') {
+        document.querySelector('main').classList.remove('hidden');
+        document.getElementById('tab-main-btn').classList.add('text-emerald-700');
+        document.getElementById('tab-main-btn').classList.remove('text-slate-400');
+      } else {
+        const activeContainer = document.getElementById(`tab-${tabId}`);
+        if (activeContainer) activeContainer.classList.remove('hidden');
+        
+        const activeBtn = document.getElementById(`tab-${tabId}-btn`);
+        if (activeBtn) {
+          activeBtn.classList.add('text-emerald-700');
+          activeBtn.classList.remove('text-slate-400');
+        }
+      }
+
+      if (tabId === 'athkar') {
+        filterAthkar('morning'); 
+      } else if (tabId === 'qibla') {
+        initQibla();
+      } else if (tabId === 'duas') {
+        renderDuas();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ---------------- نظام إدارة وعرض الأذكار والتكرار ----------------
+    function filterAthkar(type) {
+      const container = document.getElementById('athkar-items-container');
+      container.innerHTML = '';
+
+      const types = ['morning', 'evening', 'after_prayer'];
+      types.forEach(t => {
+        const btn = document.getElementById(`athkar-btn-${t}`);
+        if (t === type) {
+          btn.className = "bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap shadow-sm";
+        } else {
+          btn.className = "bg-slate-100 text-slate-600 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap hover:bg-slate-200 transition";
+        }
+      });
+
+      athkarData[type].forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = "p-4 bg-slate-50 border border-slate-100 rounded-2xl transition space-y-3 relative";
+        
+        div.innerHTML = `
+          <p class="font-amiri text-base text-slate-900 text-justify leading-relaxed">${item.text}</p>
+          <div class="flex justify-between items-center pt-2 border-t border-slate-200/50">
+            <span class="text-[10px] text-slate-500 font-bold">التكرار: ${item.count}</span>
+            <button onclick="incrementAthkarCount('${type}', ${index}, this)" class="bg-emerald-50 text-emerald-800 font-bold px-4 py-1.5 rounded-full text-xs flex items-center gap-1 hover:bg-emerald-100 transition shadow-sm">
+              <span id="counter-current-${index}">${item.current}</span> / <span>${item.count}</span>
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+      lucide.createIcons();
+    }
+
+    function incrementAthkarCount(type, index, btnElement) {
+      const item = athkarData[type][index];
+      if (item.current < item.count) {
+        item.current += 1;
+        document.getElementById(`counter-current-${index}`).textContent = item.current;
+        playBeep(); 
+
+        if (item.current === item.count) {
+          btnElement.className = "bg-slate-200 text-slate-400 font-bold px-4 py-1.5 rounded-full text-xs flex items-center gap-1 cursor-not-allowed";
+          btnElement.innerHTML = `<span>مكتمل</span> <i data-lucide="check" class="w-3.5 h-3.5"></i>`;
+          lucide.createIcons();
+        }
+      }
+    }
+
+    // ---------------- نظام إدارة وعرض الأدعية الصحيحة ----------------
+    function renderDuas() {
+      const container = document.getElementById('duas-list-container');
+      container.innerHTML = '';
+
+      duasData.forEach(dua => {
+        const div = document.createElement('div');
+        div.className = "p-4 bg-amber-50/50 border border-amber-100/50 rounded-2xl relative overflow-hidden";
+        div.innerHTML = `
+          <p class="font-amiri text-base text-slate-800 text-justify leading-relaxed">${dua.text}</p>
+          <div class="mt-2 text-left">
+            <span class="text-[9px] text-amber-800 bg-amber-100/40 px-2.5 py-0.5 rounded font-bold">${dua.source}</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // ---------------- التواريخ الهجرية والميلادية والحديث اليومي ----------------
+    function updateTimesAndDates() {
+      const now = new Date();
+      
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', calendar: 'gregory' };
+      document.getElementById('header-gregorian-date').textContent = now.toLocaleDateString('ar-EG', options);
+
+      const hijriDate = calculateHijriDate(now);
+      document.getElementById('header-hijri-date').textContent = `${hijriDate.day} ${hijriDate.monthName} ${hijriDate.year} هـ`;
+    }
+
+    function calculateHijriDate(date) {
+      let julianDay = Math.floor(date.getTime() / 86400000) + 2440588;
+      let l = julianDay - 1948440 + 10632;
+      let n = Math.floor((l - 1) / 10631);
+      l = l - 10631 * n + 354;
+      let j = Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719) + Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
+      l = l - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
+      
+      let m = Math.floor((24 * l) / 709);
+      let d = l - Math.floor((709 * m) / 24);
+      let y = 30 * n + j - 30;
+
+      const hijriMonths = [
+        "محرّم", "صفر", "ربيع الأول", "ربيع الآخر", "جمادى الأولى", "جمادى الآخرة",
+        "رجب", "شعبان", "رمضان", "شوّال", "ذو القعدة", "ذو الحجة"
+      ];
+
+      return {
+        day: d,
+        month: m,
+        monthName: hijriMonths[m - 1],
+        year: y
+      };
+    }
+
+    function setDailyHadith() {
+      const now = new Date();
+      const index = now.getDate() % hadithsList.length;
+      const hadith = hadithsList[index];
+      
+      document.getElementById('daily-hadith-text').textContent = `"${hadith.text}"`;
+      document.getElementById('daily-hadith-rawi').textContent = hadith.rawi;
+    }
+
+    // ---------------- متتبع الصلوات والتقييم اليومي ----------------
+    let trackerState = { fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false };
+
+    function initTracker() {
+      const saved = localStorage.getItem('prayer_tracker_state');
+      if (saved) {
+        trackerState = JSON.parse(saved);
+      }
+      updateTrackerUI();
+    }
+
+    function toggleTrack(prayerKey) {
+      trackerState[prayerKey] = !trackerState[prayerKey];
+      localStorage.setItem('prayer_tracker_state', JSON.stringify(trackerState));
+      updateTrackerUI();
+      playBeep();
+    }
+
+    function updateTrackerUI() {
+      let completedCount = 0;
+      const keys = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+      
+      keys.forEach(key => {
+        const btn = document.getElementById(`track-${key}`);
+        const iconDiv = document.getElementById(`track-icon-${key}`);
+        
+        if (trackerState[key]) {
+          completedCount += 1;
+          btn.className = "flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 transition scale-[1.03]";
+          iconDiv.className = "w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center border-0 text-white shadow-sm";
+        } else {
+          btn.className = "flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition";
+          iconDiv.className = "w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400";
+        }
+      });
+
+      const percentage = Math.round((completedCount / 5) * 100);
+      document.getElementById('tracker-percentage').textContent = `${percentage}% مكتمل`;
+    }
+
+    // ---------------- تنبيه صيام النوافل ----------------
+    let fastingReminders = { 'mon-thu': true, 'white': true };
+
+    function initFastingReminders() {
+      const saved = localStorage.getItem('fasting_reminders_settings');
+      if (saved) {
+        fastingReminders = JSON.parse(saved);
+      }
+      updateFastingUI();
+    }
+
+    function toggleFastingReminder(type) {
+      fastingReminders[type] = !fastingReminders[type];
+      localStorage.setItem('fasting_reminders_settings', JSON.stringify(fastingReminders));
+      updateFastingUI();
+      playBeep();
+    }
+
+    function updateFastingUI() {
+      const types = ['mon-thu', 'white'];
+      types.forEach(type => {
+        const btn = document.getElementById(`btn-toggle-fast-${type}`);
+        const circle = document.getElementById(`toggle-circle-${type}`);
+        
+        if (fastingReminders[type]) {
+          btn.classList.replace('bg-slate-300', 'bg-emerald-600');
+          circle.classList.replace('translate-x-0', 'translate-x-5');
+        } else {
+          btn.classList.replace('bg-emerald-600', 'bg-slate-300');
+          circle.classList.replace('translate-x-5', 'translate-x-0');
+        }
+      });
+    }
+
+    // ---------------- إدارة إعدادات صوت الأذان ومواقيت الإنذار ----------------
+    function loadNotificationSettings() {
+      const selectBefore = document.getElementById('before-prayer-trigger');
+      selectBefore.addEventListener('change', (e) => {
+        alarmMinutesBefore = parseInt(e.target.value);
+        localStorage.setItem('alarm_minutes_before', alarmMinutesBefore);
+      });
+
+      const savedBefore = localStorage.getItem('alarm_minutes_before');
+      if (savedBefore) {
+        alarmMinutesBefore = parseInt(savedBefore);
+        selectBefore.value = alarmMinutesBefore;
+      }
+    }
+
+    function toggleMuteAdhan() {
+      adhanMuted = !adhanMuted;
+      const btnText = document.getElementById('text-mute-adhan');
+      const btnIcon = document.getElementById('icon-mute-adhan');
+      const btn = document.getElementById('btn-mute-adhan');
+
+      if (adhanMuted) {
+        btnText.textContent = 'الأذان صامت';
+        btn.classList.replace('bg-amber-50', 'bg-slate-100');
+        btn.classList.replace('text-amber-800', 'text-slate-500');
+        btnIcon.setAttribute('data-lucide', 'volume-x');
+      } else {
+        btnText.textContent = 'صوت الأذان مفعل';
+        btn.classList.replace('bg-slate-100', 'bg-amber-50');
+        btn.classList.replace('text-slate-500', 'text-amber-800');
+        btnIcon.setAttribute('data-lucide', 'volume-2');
+      }
+      lucide.createIcons();
+    }
+
+    function togglePrayerNotification(prayerKey) {
+      const btn = document.getElementById(`notif-${prayerKey}`);
+      const isMuted = btn.classList.contains('text-slate-300');
+      if (isMuted) {
+        btn.classList.replace('text-slate-300', 'text-emerald-600');
+        btn.innerHTML = `<i data-lucide="bell" class="w-4 h-4"></i>`;
+      } else {
+        btn.classList.replace('text-emerald-600', 'text-slate-300');
+        btn.innerHTML = `<i data-lucide="bell-off" class="w-4 h-4"></i>`;
+      }
+      lucide.createIcons();
+      playBeep();
+    }
+
+    // ---------------- النوافذ المنبثقة والصوتيات التفاعلية ----------------
+    let modalActionCallback = null;
+
+    function showCustomModal(title, body, callback = null) {
+      document.getElementById('notif-modal-title').textContent = title;
+      document.getElementById('notif-modal-body').textContent = body;
+      document.getElementById('custom-notification-modal').classList.remove('hidden');
+      modalActionCallback = callback;
+    }
+
+    function closeNotificationModal() {
+      document.getElementById('custom-notification-modal').classList.add('hidden');
+      stopAdhanAudio();
+    }
+
+    function stopAdhanAudio() {
+      const adhanPlayer = document.getElementById('adhan-player');
+      if (adhanPlayer) adhanPlayer.pause();
+      
+      document.getElementById('custom-notification-modal').classList.add('hidden');
+      
+      if (modalActionCallback) {
+        modalActionCallback();
+        modalActionCallback = null;
+      }
+    }
+
+    function playBeep() {
+      const beep = document.getElementById('beep-player');
+      if (beep) {
+        beep.currentTime = 0;
+        beep.volume = 0.5;
+        beep.play().catch(e => {});
+      }
+    }
+  </script>
+</body>
+</html>
