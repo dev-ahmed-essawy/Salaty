@@ -306,14 +306,20 @@
       </div>
     </section>
 
-    <!-- الحديث النبوي اليومي -->
+    <!-- الحديث النبوي اليومي مع ميزة التحميل المباشر من الدرر السنية -->
     <section class="bg-amber-50 rounded-3xl p-5 border border-amber-100/60 shadow-sm relative overflow-hidden">
       <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-100 rounded-full opacity-30 flex items-center justify-center">
         <span class="font-amiri text-amber-300 text-6xl">ﷺ</span>
       </div>
-      <div class="flex gap-2 items-center text-amber-800 font-bold mb-2">
-        <i data-lucide="quote" class="w-5 h-5"></i>
-        <span>الحديث اليومي الصحيح</span>
+      <div class="flex justify-between items-center mb-2">
+        <div class="flex gap-2 items-center text-amber-800 font-bold">
+          <i data-lucide="quote" class="w-5 h-5"></i>
+          <span>الحديث النبوي الصحيح</span>
+        </div>
+        <button id="load-hadith-btn" onclick="fetchHadithFromDorar()" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[10px] font-black px-2.5 py-1.5 rounded-xl transition flex items-center gap-1">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>تحديث من الدرر السنية</span>
+        </button>
       </div>
       <p class="font-amiri text-[15px] text-slate-800 leading-relaxed text-justify" id="daily-hadith-text">
         "إنَّما الأعْمالُ بالنِّيَّاتِ، وإنَّما لِكُلِّ امْرِئٍ ما نَوَى، فمَن كانَتْ هِجْرَتُهُ إلى اللَّهِ ورَسولِهِ فهِجْرَتُهُ إلى اللَّهِ ورَسولِهِ..."
@@ -496,13 +502,19 @@
     </div>
   </div>
 
-  <!-- صفحة الأدعية الصحيحة الثابتة -->
+  <!-- صفحة الأدعية الصحيحة الثابتة مع إمكانية التحميل من الدرر السنية -->
   <div id="tab-duas" class="hidden max-w-md mx-auto w-full px-4 mt-4 space-y-4 pb-28 ios-scroll">
     <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-      <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-        <i data-lucide="heart-handshake" class="w-5.5 h-5.5 text-emerald-600"></i>
-        <span>جوامع الأدعية الصحيحة الثابتة</span>
-      </h2>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="heart-handshake" class="w-5.5 h-5.5 text-emerald-600"></i>
+          <span>جوامع الأدعية الصحيحة الثابتة</span>
+        </h2>
+        <button id="load-dua-btn" onclick="fetchDuaFromDorar()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-black px-3 py-1.5 rounded-xl transition flex items-center gap-1">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>جلب دعاء مأثور (الدرر)</span>
+        </button>
+      </div>
 
       <div class="space-y-4" id="duas-list-container">
         <!-- تعبأ الأدعية تلقائياً -->
@@ -537,6 +549,7 @@
   <!-- ==================== منطق جافا سكريبت المتكامل للميزات ==================== -->
   <script>
     // ---------------- الإعدادات العامة والبيانات الثابتة ----------------
+    const apiKey = ""; // يتم تشغيلها ديناميكياً عبر بيئة النظام التشغيلية
     let userLatitude = 30.0444;  // الافتراضي: القاهرة
     let userLongitude = 31.2357; // الافتراضي: القاهرة
     let adhanMuted = false;
@@ -958,8 +971,6 @@
     }
 
     // ---------------- حساب زاوية القبلة الجغرافية بدقة لموقع المستخدم ----------------
-    // إحداثيات مكة المكرمة الكعبة المشرفة:
-    // خط العرض: 21.4225 شمالاً، خط الطول: 39.8262 شرقاً
     function calculateQiblaAngleDegrees(lat, lon) {
       const makkahLat = 21.4225 * Math.PI / 180;
       const makkahLon = 39.8262 * Math.PI / 180;
@@ -1054,11 +1065,8 @@
 
       const countryMethod = worldCountries[selectedCountry].method;
       if (countryMethod === "Makkah") {
-        // جامعة أم القرى (مكة المكرمة)
         fajrAngle = -18.5;
-        // العشاء يحسب بعد المغرب بـ 90 دقيقة (1.5 ساعة)، سنقوم بتطبيقها لاحقاً بالتحويل
       } else if (countryMethod === "Gulf") {
-        // الهيئة العامة للشؤون الإسلامية بدبي والخليج
         fajrAngle = -18.2;
         ishaAngle = -18.2;
       }
@@ -1081,7 +1089,6 @@
       let maghribVal = dhuhrTimeDecimal + H_sunset;
       let ishaVal = dhuhrTimeDecimal + H_isha;
 
-      // لتعديل العشاء في طريقة أم القرى بالسعودية (العشاء دائماً بعد المغرب بـ 90 دقيقة)
       if (countryMethod === "Makkah") {
         ishaVal = maghribVal + 1.5; 
       }
@@ -1288,6 +1295,146 @@
       });
     }
 
+    // ---------------- جلب الأحاديث الصحيحة من الدرر السنية ----------------
+    async function fetchHadithFromDorar() {
+      const btn = document.getElementById('load-hadith-btn');
+      btn.disabled = true;
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> <span>جاري التخريج...</span>`;
+      lucide.createIcons();
+
+      let delay = 1000;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{
+                  text: "ابحث في محرك الدرر السنية (dorar.net) واجلب حديثاً نبوياً صحيحاً من صحيح البخاري أو صحيح مسلم أو رياض الصالحين. أرجع النتيجة على شكل كود JSON فقط يحتوي على الحقول: hadith (متن الحديث)، rawi (الراوي)، source (المصدر)، grade (درجة الصحة وهي دائماً صحيح أو صحيح البخاري/مسلم)."
+                }]
+              }],
+              systemInstruction: {
+                parts: [{
+                  text: "أنت خبير في تخريج السنة النبوية المطهرة بالاعتماد على موقع الدرر السنية. يجب أن تعطي رداً بصيغة JSON فقط دون أي نصوص إضافية."
+                }]
+              },
+              tools: [{ "google_search": {} }],
+              generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: "OBJECT",
+                  properties: {
+                    hadith: { type: "STRING" },
+                    rawi: { type: "STRING" },
+                    source: { type: "STRING" },
+                    grade: { type: "STRING" }
+                  },
+                  required: ["hadith", "rawi", "source", "grade"]
+                }
+              }
+            })
+          });
+
+          if (!response.ok) throw new Error("API failed");
+          const result = await response.json();
+          const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+          const data = JSON.parse(jsonText);
+
+          // تحديث الواجهة بالحديث الصحيح المخرج
+          document.getElementById('daily-hadith-text').textContent = `"${data.hadith}"`;
+          document.getElementById('daily-hadith-rawi').textContent = `رواه ${data.rawi} | المصدر: ${data.source} (${data.grade} - تخريج الدرر السنية)`;
+          
+          playBeep();
+          break;
+        } catch (error) {
+          if (attempt === 4) {
+            showCustomModal("تنبيه الاتصال", "تعذر الاتصال بخوادم الدرر السنية مؤقتاً، يرجى إعادة المحاولة.");
+          }
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2; // تراجع أسي للخطأ
+        }
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+      lucide.createIcons();
+    }
+
+    // ---------------- جلب الأدعية الصحيحة من الدرر السنية ----------------
+    async function fetchDuaFromDorar() {
+      const btn = document.getElementById('load-dua-btn');
+      btn.disabled = true;
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> <span>جاري الجلب...</span>`;
+      lucide.createIcons();
+
+      let delay = 1000;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        try {
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{
+                  text: "ابحث واجلب دعاء صحيحاً ثابتاً من الأحاديث النبوية المأثورة الموثقة في الدرر السنية. أرجع النتيجة بصيغة JSON فقط تحتوي على: dua (نص الدعاء الكامل)، source (التخريج والمصدر من كتب السنة)."
+                }]
+              }],
+              systemInstruction: {
+                parts: [{
+                  text: "أنت متخصص في الأدعية المأثورة الصحيحة الثابتة بالرجوع للدرر السنية. تعطي الرد بصيغة JSON فقط دون أي شرح."
+                }]
+              },
+              tools: [{ "google_search": {} }],
+              generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                  type: "OBJECT",
+                  properties: {
+                    dua: { type: "STRING" },
+                    source: { type: "STRING" }
+                  },
+                  required: ["dua", "source"]
+                }
+              }
+            })
+          });
+
+          if (!response.ok) throw new Error("API failed");
+          const result = await response.json();
+          const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+          const data = JSON.parse(jsonText);
+
+          // إدراج الدعاء المخرج في أعلى القائمة
+          const container = document.getElementById('duas-list-container');
+          const div = document.createElement('div');
+          div.className = "p-4 bg-emerald-50/40 border border-emerald-200/50 rounded-2xl relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300";
+          div.innerHTML = `
+            <div class="absolute left-2 top-2 text-emerald-700 bg-emerald-100/50 text-[8px] font-black px-2 py-0.5 rounded">مأثور صحيح</div>
+            <p class="font-amiri text-base text-slate-800 text-justify leading-relaxed">${data.dua}</p>
+            <div class="mt-2 text-left">
+              <span class="text-[9px] text-emerald-800 bg-emerald-100/40 px-2.5 py-0.5 rounded font-bold">${data.source} (الدرر السنية)</span>
+            </div>
+          `;
+          container.insertBefore(div, container.firstChild);
+          playBeep();
+          break;
+        } catch (error) {
+          if (attempt === 4) {
+            showCustomModal("تنبيه الاتصال", "تعذر جلب الدعاء المأثور حالياً، يرجى المحاولة لاحقاً.");
+          }
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2;
+        }
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+      lucide.createIcons();
+    }
+
     // ---------------- نظام القبلة التفاعلي والمطور للهواتف الذكية ----------------
     let absoluteDeviceHeading = null;
 
@@ -1351,11 +1498,9 @@
     }
 
     function enableManualQiblaMode() {
-      // إظهار موجهات يدوية وشرح واضح للمستخدم لتوفير خيار تحكم بديل في حال غياب الجيروسكوب
       document.getElementById('qibla-sensor-message').textContent = "تم تنشيط وضع الضبط اليدوي. حرك شريط السحب لتحديد اتجاه الشمال يدوياً ومطابقة القبلة.";
     }
 
-    // تدوير البوصلة والسهم يدوياً عند تحريك شريط السحب (Slider) لمساعدة الأجهزة الأقدم
     function handleManualCompassRotate(val) {
       const heading = parseInt(val);
       document.getElementById('manual-angle-text').textContent = `${heading}°`;
@@ -1364,14 +1509,11 @@
       const mainArrow = document.getElementById('main-qibla-arrow');
       const sensorMsg = document.getElementById('qibla-sensor-message');
 
-      // تطبيق تدوير البوصلة يدوياً
       compassDisc.style.transform = `rotate(${-heading}deg)`;
       
-      // توجيه السهم المركزي نسبة لتدوير البوصلة يدوياً
       let relativeQiblaAngle = calculatedQiblaAngle - heading;
       mainArrow.style.transform = `rotate(${relativeQiblaAngle}deg)`;
 
-      // مقارنة التقارب يدوياً
       let checkAngle = (relativeQiblaAngle + 360) % 360;
       if (checkAngle < 6 || checkAngle > 354) {
         sensorMsg.textContent = "التوجيه اليدوي متطابق مع اتجاه القبلة المشرفة! 🕋";
