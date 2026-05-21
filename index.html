@@ -505,6 +505,8 @@
 let audioContext;
 let audioBuffer = null;
 let currentAudioURL = null;
+let currentAdhanAudio = null;
+let isPlaying = false;
 
 async function loadAudio(url) {
     // لو نفس الصوت لا تعيد التحميل ✅
@@ -914,33 +916,41 @@ async function loadAudio(url) {
 }
 
 async function testAdhanVoiceSpecific(key) {
-    try {
-        const voiceId = prayerSettings[key].voice;
-        const url = adhanAudioFiles[voiceId].url;
 
-        showCustomModal("⏳ جاري التحميل", "يتم تحميل الصوت...");
+const voiceId = prayerSettings[key].voice;
+    const url = adhanAudioFiles[voiceId].url;
 
-        // تحميل الصوت حسب الاختيار ✅
-        await loadAudio(url);
-
-        // فك الحظر
-        if (audioContext.state === "suspended") {
-            await audioContext.resume();
-        }
-
-        // تشغيل الصوت
-        playAudioBuffer();
-
-        showCustomModal(
-            "✅ يتم التشغيل",
-            `جارٍ تشغيل: ${adhanAudioFiles[voiceId].name}`  );
-
-    } catch (err) {
-        console.error(err);
-        showCustomModal("❌ خطأ", "فشل تحميل أو تشغيل الصوت");
+    // ✅ وقف الصوت القديم
+    if (currentAdhanAudio) {
+        currentAdhanAudio.pause();
+        currentAdhanAudio.currentTime = 0;
     }
+
+    // ✅ إنشاء صوت جديد
+    currentAdhanAudio = new Audio(url);
+
+    currentAdhanAudio.volume = 0.8;
+
+    currentAdhanAudio.play()
+        .then(() => {
+            isPlaying = true;
+
+            showCustomModal(
+                "✅ يعمل",
+                `تشغيل: ${adhanAudioFiles[voiceId].name}`
+            );
+        })
+        .catch(() => {
+            showCustomModal("❌ فشل", "اضغط على الصفحة أولًا");
+        });
+
+    // ✅ لما الصوت يخلص
+    currentAdhanAudio.onended = () => {
+        isPlaying = false;
+        currentAdhanAudio = null;
+    };
 }
-``    
+
     
 
 
