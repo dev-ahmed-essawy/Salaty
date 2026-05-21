@@ -1,7 +1,8 @@
 {
   "name": "تطبيق ذاكر - مواقيت الصلاة",
   "short_name": "ذاكر",
-  "start_url": "/",
+  "start_url": "/Salaty/",
+  "scope": "/Salaty/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#022c22",
