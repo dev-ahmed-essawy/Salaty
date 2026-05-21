@@ -486,14 +486,14 @@
       <h4 class="text-lg font-bold text-emerald-950 mb-1" id="notif-modal-title">تنبيه الصلاة</h4>
       <p class="text-xs text-slate-600 mb-6" id="notif-modal-body">حان الآن موعد الأذان حسب توقيتك المحلي</p>
       
-      <div class="space-y-2">
-        <button onclick="stopAdhanAudio()" class="w-full bg-emerald-700 text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-emerald-800 transition active:scale-95 text-sm">
-          إيقاف الأذان / حسناً
-        </button>
-        <button onclick="closeNotificationModal()" class="w-full bg-slate-100 text-slate-600 font-bold py-2.5 rounded-2xl hover:bg-slate-200 transition text-xs active:scale-95">
-          إغلاق
-        </button>
-      </div>
+      
+<div class="space-y-2">
+  <button onclick="closeNotificationModal()" 
+    class="w-full bg-emerald-700 text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-emerald-800 transition active:scale-95 text-sm">
+    إيقاف الأذان
+  </button>
+</div>
+
     </div>
   </div>
 
@@ -1424,15 +1424,19 @@ const voiceId = prayerSettings[key].voice;
         stopAdhanAudio(); 
     }
 
-    function stopAdhanAudio() { 
-        let p = document.getElementById('adhan-player'); 
-        if(p) p.pause(); 
-        document.getElementById('custom-notification-modal').classList.add('hidden'); 
-        if(modalActionCallback) { 
-            modalActionCallback(); 
-            modalActionCallback = null; 
-        } 
+    
+    function stopAdhanAudio() {
+        // ✅ إيقاف الصوت
+        if (currentAdhanAudio) {
+            currentAdhanAudio.pause();
+            currentAdhanAudio.currentTime = 0;
+            currentAdhanAudio = null;
+        }
+
+        // ✅ إغلاق المودال
+        document.getElementById('custom-notification-modal').classList.add('hidden');
     }
+
 
     function playBeep() { 
         let b = document.getElementById('beep-player'); 
