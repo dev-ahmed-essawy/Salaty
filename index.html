@@ -782,7 +782,8 @@ async function loadAudio(url) {
         { text: "الْمُؤْمِنُ القَوِيُّ، خَيْرٌ وَأَحَبُّ إلَى اللهِ مِنَ المُؤْمِنِ الضَّعِيفِ...", rawi: "رواه مسلم" }
     ];
 
-    window.onload = function() {
+    window.onload = function () {
+
         setupPWA();
         loadUserSettings();
         initPrayerSettingsUI();
@@ -791,9 +792,24 @@ async function loadAudio(url) {
         setDailyHadith();
         initTracker();
         initFastingReminders();
+
         setInterval(runAppClock, 1000);
+
         lucide.createIcons();
+
+        // ✅ إخفاء Splash
+        setTimeout(() => {
+            const splash = document.getElementById("splash-screen");
+
+            splash.style.opacity = "0";
+
+            setTimeout(() => {
+                splash.remove();
+            }, 700);
+
+        }, 2200);
     };
+
 
     function setupPWA() {
         if ('serviceWorker' in navigator) {
