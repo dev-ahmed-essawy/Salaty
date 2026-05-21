@@ -48,6 +48,18 @@
     .ios-scroll {
       -webkit-overflow-scrolling: touch;
     }
+    @keyframes loader {
+    0% {
+        width: 0%;
+        }
+        100% {
+            width: 100%;
+        }
+    }
+    
+    .animate-loader {
+        animation: loader 2s ease-in-out forwards;
+    }
     #compass-container {
       perspective: 1000px;
     }
