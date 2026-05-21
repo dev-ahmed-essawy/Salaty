@@ -54,7 +54,28 @@
   </style>
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col pb-24 md:pb-6">
+<!-- Splash Screen -->
+<div id="splash-screen"
+class="fixed inset-0 z-[9999] bg-[#f7f5f0] flex flex-col items-center justify-center transition-opacity duration-700">
 
+    <img src="images/icon-512.png"
+    class="w-40 h-40 mb-6 drop-shadow-xl animate-pulse"
+    alt="ذاكر">
+
+    <h1 class="text-4xl font-black text-emerald-900 mb-2">
+        ذاكر
+    </h1>
+
+    <p class="text-emerald-700 text-sm mb-8">
+        تطبيق الأذكار والأدعية
+    </p>
+
+    <!-- Loader -->
+    <div class="w-52 h-3 bg-emerald-100 rounded-full overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-emerald-500 to-emerald-700 rounded-full animate-loader"></div>
+    </div>
+
+</div>
   <!-- رأس الصفحة والتاريخ الهجري -->
   <header class="bg-emerald-950 text-amber-100 py-6 px-5 rounded-b-[2.5rem] shadow-lg relative overflow-hidden">
     <div class="absolute inset-0 opacity-5 pointer-events-none flex justify-center items-center">
