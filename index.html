@@ -1,1522 +1,1571 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>تطبيق ذاكر - مواقيت الصلاة والعبادات</title>
-  
-  <!-- تهيئة التطبيق للهواتف الذكية (iOS & Android Meta Tags) -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#022c22">
-  <meta name="format-detection" content="telephone=no">
-  
-  <link rel="icon" href="icon-192.png">
-  <!-- أيقونة التطبيق لهواتف آيفون -->
-  <link rel="apple-touch-icon" href="images/icon-192.png">
-  <link rel="manifest" href="manifest.json">
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Tajawal & Amiri -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <style>
-    body {
-      font-family: 'Tajawal', sans-serif;
-      background-color: #f7f5f0;
-      padding-top: env(safe-area-inset-top, 0px);
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-    .font-amiri {
-      font-family: 'Amiri', serif;
-    }
-    .glow-gold {
-      box-shadow: 0 0 15px rgba(217, 119, 6, 0.15);
-    }
-    .glow-emerald {
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
-    }
-    ::-webkit-scrollbar {
-      display: none;
-    }
-    .ios-scroll {
-      -webkit-overflow-scrolling: touch;
-    }
-    @keyframes loader {
-    0% {
-        width: 0%;
-        }
-        100% {
-            width: 100%;
-        }
-    }
-    
-    .animate-loader {
-        animation: loader 2s ease-in-out forwards;
-    }
-    #compass-container {
-      perspective: 1000px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexERP - نظام إدارة المشاريع المتكامل</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- React and ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <!-- Babel CDN for JSX transpilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Google Font Cairo for Arabic -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </head>
-<body class="text-slate-800 min-h-screen flex flex-col pb-24 md:pb-6">
-<!-- Splash Screen -->
-<div id="splash-screen"
-class="fixed inset-0 z-[9999] bg-[#f7f5f0] flex flex-col items-center justify-center transition-opacity duration-700">
+<body class="bg-slate-100 text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
 
-    <img src="images/icon-512.png"
-    class="w-40 h-40 mb-6 drop-shadow-xl animate-pulse"
-    alt="ذاكر">
+    <div id="root"></div>
 
-    <h1 class="text-4xl font-black text-emerald-900 mb-2">
-        ذاكر
-    </h1>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-    <p class="text-emerald-700 text-sm mb-8">
-        تطبيق الأذكار والأدعية
-    </p>
+        const initialWarehouses = [
+            { id: 'wh-1', name: 'المستودع المركزي الرئيسي', location: 'المبنى أ، المنطقة الصناعية', capacity: 10000, manager: 'سارة أحمد' },
+            { id: 'wh-2', name: 'مركز لوجستيات المنطقة الغربية', location: 'شارع السلام، المجمع اللوجستي', capacity: 5000, manager: 'محمود حسن' },
+            { id: 'wh-3', name: 'مستودع الميناء الشمالي', location: 'الرصيف 14، منطقة الشحن', capacity: 7500, manager: 'إلينا أسامة' }
+        ];
 
-    <!-- Loader -->
-    <div class="w-52 h-3 bg-emerald-100 rounded-full overflow-hidden">
-        <div class="h-full bg-gradient-to-r from-emerald-500 to-emerald-700 rounded-full animate-loader"></div>
-    </div>
-
-</div>
-  <!-- رأس الصفحة والتاريخ الهجري -->
-  <header class="bg-emerald-950 text-amber-100 py-6 px-5 rounded-b-[2.5rem] shadow-lg relative overflow-hidden">
-    <div class="absolute inset-0 opacity-5 pointer-events-none flex justify-center items-center">
-      <svg width="400" height="400" viewBox="0 0 100 100" fill="currentColor">
-        <path d="M50 0 L60 40 L100 50 L60 60 L50 100 L40 60 L0 50 L40 40 Z"/>
-      </svg>
-    </div>
-    
-    <div class="max-w-md mx-auto flex justify-between items-center relative z-10">
-      <div>
-        <h1 class="text-2xl font-black tracking-wide text-amber-400 flex items-center gap-2">
-          <i data-lucide="moon" class="w-6 h-6 fill-amber-400 animate-pulse"></i>
-          <span>ذاكِر</span>
-        </h1>
-        <p class="text-[10px] text-emerald-200 mt-1 max-w-[180px] truncate" id="current-location-text">جاري تحديد موقعك الحالي...</p>
-      </div>
-      <div class="text-left">
-        <div class="text-sm font-bold text-amber-300" id="header-hijri-date">--</div>
-        <div class="text-[11px] text-emerald-300" id="header-gregorian-date">--</div>
-      </div>
-    </div>
-  </header>
-
-  <!-- زر التثبيت كتطبيق -->
-  <div id="pwa-install-banner" class="hidden max-w-md mx-auto w-full px-4 mt-3">
-    <div class="bg-gradient-to-r from-emerald-800 to-emerald-950 text-white rounded-2xl p-4 shadow-md flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center text-emerald-950">
-          <i data-lucide="download" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h4 class="text-xs font-bold">ثبّت تطبيق "ذاكر" على هاتفك</h4>
-          <p class="text-[10px] text-emerald-200">لتصفح سريع وسهل بدون إنترنت</p>
-        </div>
-      </div>
-      <button onclick="installPWA()" class="bg-amber-400 hover:bg-amber-500 text-emerald-950 text-xs font-black px-4 py-2 rounded-xl transition duration-150">
-        تثبيت
-      </button>
-    </div>
-  </div>
-
-  <!-- المحتوى الرئيسي (الرئيسية) -->
-  <main id="tab-main" class="max-w-md mx-auto w-full px-4 mt-4 flex-1 space-y-4 ios-scroll">
-
-    <!-- ودجت الصلاة القادمة والوقت المتبقي -->
-    <section class="bg-white rounded-3xl p-5 shadow-sm border border-emerald-100/50 glow-emerald relative overflow-hidden">
-      <div class="absolute top-0 left-0 w-2 h-full bg-emerald-600"></div>
-      <div class="flex justify-between items-start">
-        <div>
-          <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">الفرض القادم</span>
-          <h2 class="text-2xl font-black text-emerald-950 mt-2 flex items-center gap-2" id="next-prayer-name">
-            --
-          </h2>
-        </div>
-        <div class="text-left">
-          <span class="text-[10px] text-slate-500 block font-medium">الوقت المتبقي</span>
-          <span class="text-2xl font-bold text-amber-600 font-mono tracking-wider" id="next-prayer-countdown">--:--:--</span>
-        </div>
-      </div>
-
-      <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
-        <div class="flex items-center gap-1.5" id="next-prayer-status-text">
-          <i data-lucide="volume-2" class="w-4 h-4 text-emerald-600"></i>
-          <span>جاري تحميل الإعدادات...</span>
-        </div>
-        <button onclick="switchTab('settings')" class="flex items-center gap-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold px-3 py-1.5 rounded-xl transition">
-          <i data-lucide="settings-2" class="w-3.5 h-3.5"></i>
-          <span>تعديل التنبيه</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- عرض مواقيت الصلاة لليوم الحالي -->
-    <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm">
-          <i data-lucide="clock" class="w-5 h-5 text-emerald-600"></i>
-          <span>مواقيت الصلاة اليوم</span>
-        </h3>
-        <button onclick="forceGPSRefresh()" class="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-xl transition" title="تحديث الموقع الجغرافي">
-          <i data-lucide="locate" class="w-4 h-4"></i>
-          <span>موقعي تلقائيًا (GPS)</span>
-        </button>
-      </div>
-
-      <div class="space-y-2.5" id="prayer-times-list">
-        <!-- الفجر -->
-        <div id="prayer-row-fajr" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 prayer-icon">
-              <i data-lucide="sun-dim" class="w-4 h-4"></i>
-            </div>
-            <span class="font-bold text-slate-700 text-sm">الفجر</span>
-          </div>
-          <div class="flex items-center gap-4">
-            <span class="font-mono font-bold text-base text-slate-700" id="time-fajr">--:-- --</span>
-            <button onclick="togglePrayerMuteFromHome('fajr')" class="p-2 text-emerald-600 hover:text-emerald-800 transition" id="notif-fajr">
-              <i data-lucide="bell" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-        <!-- الشروق -->
-        <div id="prayer-row-sunrise" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition opacity-60">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
-              <i data-lucide="sunrise" class="w-4 h-4"></i>
-            </div>
-            <span class="font-bold text-slate-600 text-sm">الشروق</span>
-          </div>
-          <div class="flex items-center gap-4">
-            <span class="font-mono font-semibold text-slate-600 text-sm" id="time-sunrise">--:-- --</span>
-            <div class="w-8"></div>
-          </div>
-        </div>
-        <!-- الظهر -->
-        <div id="prayer-row-dhuhr" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 prayer-icon">
-              <i data-lucide="sun" class="w-4 h-4"></i>
-            </div>
-            <span class="font-bold text-slate-700 text-sm">الظهر</span>
-          </div>
-          <div class="flex items-center gap-4">
-            <span class="font-mono font-bold text-base text-slate-700" id="time-dhuhr">--:-- --</span>
-            <button onclick="togglePrayerMuteFromHome('dhuhr')" class="p-2 text-emerald-600 hover:text-emerald-800 transition" id="notif-dhuhr">
-              <i data-lucide="bell" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-        <!-- العصر -->
-        <div id="prayer-row-asr" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 prayer-icon">
-              <i data-lucide="cloud-sun" class="w-4 h-4"></i>
-            </div>
-            <span class="font-bold text-slate-700 text-sm">العصر</span>
-          </div>
-          <div class="flex items-center gap-4">
-            <span class="font-mono font-bold text-base text-slate-700" id="time-asr">--:-- --</span>
-            <button onclick="togglePrayerMuteFromHome('asr')" class="p-2 text-emerald-600 hover:text-emerald-800 transition" id="notif-asr">
-              <i data-lucide="bell" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-        <!-- المغرب -->
-        <div id="prayer-row-maghrib" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 prayer-icon">
-              <i data-lucide="sunset" class="w-4 h-4"></i>
-            </div>
-            <span class="font-bold text-slate-700 text-sm">المغرب</span>
-          </div>
-          <div class="flex items-center gap-4">
-            <span class="font-mono font-bold text-base text-slate-700" id="time-maghrib">--:-- --</span>
-            <button onclick="togglePrayerMuteFromHome('maghrib')" class="p-2 text-emerald-600 hover:text-emerald-800 transition" id="notif-maghrib">
-              <i data-lucide="bell" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-        <!-- العشاء -->
-        <div id="prayer-row-isha" class="flex justify-between items-center p-3 rounded-2xl border border-slate-100 transition">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 prayer-icon">
-              <i data-lucide="moon-star" class="w-4 h-4"></i>
-            </div>
-            <span class="font-bold text-slate-700 text-sm">العشاء</span>
-          </div>
-          <div class="flex items-center gap-4">
-            <span class="font-mono font-bold text-base text-slate-700" id="time-isha">--:-- --</span>
-            <button onclick="togglePrayerMuteFromHome('isha')" class="p-2 text-emerald-600 hover:text-emerald-800 transition" id="notif-isha">
-              <i data-lucide="bell" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- الحديث النبوي اليومي -->
-    <section class="bg-amber-50 rounded-3xl p-5 border border-amber-100/60 shadow-sm relative overflow-hidden">
-      <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-amber-100 rounded-full opacity-30 flex items-center justify-center">
-        <span class="font-amiri text-amber-300 text-6xl">ﷺ</span>
-      </div>
-      <div class="flex justify-between items-center mb-2">
-        <div class="flex gap-2 items-center text-amber-800 font-bold">
-          <i data-lucide="quote" class="w-5 h-5"></i>
-          <span>الحديث النبوي الصحيح</span>
-        </div>
-        <button id="load-hadith-btn" onclick="fetchHadithFromDorar()" class="bg-amber-100 hover:bg-amber-200 text-amber-800 text-[10px] font-black px-2.5 py-1.5 rounded-xl transition flex items-center gap-1">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-          <span>تحديث من الدرر</span>
-        </button>
-      </div>
-      <p class="font-amiri text-[15px] text-slate-800 leading-relaxed text-justify" id="daily-hadith-text">
-        "إنَّما الأعْمالُ بالنِّيَّاتِ..."
-      </p>
-      <div class="mt-3 text-left">
-        <span class="text-[10px] text-amber-700 bg-amber-100/50 px-2.5 py-1 rounded-lg font-bold" id="daily-hadith-rawi">رواه البخاري ومسلم</span>
-      </div>
-    </section>
-
-    <!-- منبه صيام النوافل والسنن -->
-    <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-      <h3 class="font-bold text-slate-800 flex items-center gap-2 mb-3 text-sm">
-        <i data-lucide="calendar-heart" class="w-5 h-5 text-emerald-600"></i>
-        <span>تنبيه صيام النوافل والسنن</span>
-      </h3>
-      <div class="space-y-3">
-        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-100">
-          <div>
-            <span class="text-xs font-bold text-slate-700 block">صيام الإثنين والخميس</span>
-            <span class="text-[10px] text-slate-500" id="fasting-mon-thu-status">التذكير القادم: الأحد مساءً</span>
-          </div>
-          <button id="btn-toggle-fast-mon-thu" onclick="toggleFastingReminder('mon-thu')" class="w-11 h-6 bg-emerald-600 rounded-full flex items-center p-1 transition-colors duration-200">
-            <div class="bg-white w-4 h-4 rounded-full shadow-md transform translate-x-5 transition-transform duration-200" id="toggle-circle-mon-thu"></div>
-          </button>
-        </div>
-        <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-100">
-          <div>
-            <span class="text-xs font-bold text-slate-700 block">صيام الأيام البيض (١٣، ١٤، ١٥)</span>
-            <span class="text-[10px] text-slate-500" id="fasting-white-status">من كل شهر هجري</span>
-          </div>
-          <button id="btn-toggle-fast-white" onclick="toggleFastingReminder('white')" class="w-11 h-6 bg-emerald-600 rounded-full flex items-center p-1 transition-colors duration-200">
-            <div class="bg-white w-4 h-4 rounded-full shadow-md transform translate-x-5 transition-transform duration-200" id="toggle-circle-white"></div>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- متتبع الصلاة اليومي -->
-    <section class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-      <div class="flex justify-between items-center mb-3">
-        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm">
-          <i data-lucide="clipboard-check" class="w-5 h-5 text-emerald-600"></i>
-          <span>متتبع صلوات اليوم</span>
-        </h3>
-        <span class="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full animate-pulse" id="tracker-percentage">0% مكتمل</span>
-      </div>
-      <div class="grid grid-cols-5 gap-2">
-        <button id="track-fajr" onclick="toggleTrack('fajr')" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition active:scale-95">
-          <span class="text-[10px] text-slate-500 mb-1 font-bold">الفجر</span>
-          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400" id="track-icon-fajr">
-            <i data-lucide="check" class="w-4 h-4"></i>
-          </div>
-        </button>
-        <button id="track-dhuhr" onclick="toggleTrack('dhuhr')" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition active:scale-95">
-          <span class="text-[10px] text-slate-500 mb-1 font-bold">الظهر</span>
-          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400" id="track-icon-dhuhr">
-            <i data-lucide="check" class="w-4 h-4"></i>
-          </div>
-        </button>
-        <button id="track-asr" onclick="toggleTrack('asr')" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition active:scale-95">
-          <span class="text-[10px] text-slate-500 mb-1 font-bold">العصر</span>
-          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400" id="track-icon-asr">
-            <i data-lucide="check" class="w-4 h-4"></i>
-          </div>
-        </button>
-        <button id="track-maghrib" onclick="toggleTrack('maghrib')" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition active:scale-95">
-          <span class="text-[10px] text-slate-500 mb-1 font-bold">المغرب</span>
-          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400" id="track-icon-maghrib">
-            <i data-lucide="check" class="w-4 h-4"></i>
-          </div>
-        </button>
-        <button id="track-isha" onclick="toggleTrack('isha')" class="flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition active:scale-95">
-          <span class="text-[10px] text-slate-500 mb-1 font-bold">العشاء</span>
-          <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400" id="track-icon-isha">
-            <i data-lucide="check" class="w-4 h-4"></i>
-          </div>
-        </button>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- شريط القائمة السفلي -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 pb-5 pt-3 px-3 flex justify-around items-center z-40 rounded-t-[2rem] shadow-[0_-5px_25px_rgba(0,0,0,0.06)] max-w-md mx-auto">
-    <button onclick="switchTab('main')" id="tab-main-btn" class="flex flex-col items-center gap-1.5 text-emerald-700 active:scale-95 transition">
-      <i data-lucide="home" class="w-5 h-5"></i>
-      <span class="text-[10px] font-bold">الرئيسية</span>
-    </button>
-    <button onclick="switchTab('athkar')" id="tab-athkar-btn" class="flex flex-col items-center gap-1.5 text-slate-400 active:scale-95 transition">
-      <i data-lucide="book-open" class="w-5 h-5"></i>
-      <span class="text-[10px] font-bold">الأذكار</span>
-    </button>
-    <button onclick="switchTab('qibla')" id="tab-qibla-btn" class="flex flex-col items-center gap-1.5 text-slate-400 active:scale-95 transition">
-      <i data-lucide="compass" class="w-5 h-5"></i>
-      <span class="text-[10px] font-bold">القبلة</span>
-    </button>
-    <button onclick="switchTab('duas')" id="tab-duas-btn" class="flex flex-col items-center gap-1.5 text-slate-400 active:scale-95 transition">
-      <i data-lucide="heart-handshake" class="w-5 h-5"></i>
-      <span class="text-[10px] font-bold">الأدعية</span>
-    </button>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" class="flex flex-col items-center gap-1.5 text-slate-400 active:scale-95 transition">
-      <i data-lucide="settings" class="w-5 h-5"></i>
-      <span class="text-[10px] font-bold">الإعدادات</span>
-    </button>
-  </nav>
-
-  <!-- ==================== الشاشات المنبثقة والصفحات البديلة ==================== -->
-
-  <!-- صفحة الإعدادات وتخصيص الصلوات -->
-  <div id="tab-settings" class="hidden max-w-md mx-auto w-full px-4 mt-4 space-y-4 pb-28 ios-scroll">
-    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 space-y-4">
-      <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4">
-        <i data-lucide="sliders" class="w-5 h-5 text-emerald-600"></i>
-        <span>إعدادات الموقع</span>
-      </h2>
-      
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-[10px] font-bold text-slate-500 mb-1">اختر الدولة:</label>
-          <select id="country-selector" onchange="handleCountryChange()" class="w-full bg-slate-50 text-slate-800 text-xs font-bold rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <option value="eg">جمهورية مصر العربية</option>
-            <option value="sa">المملكة العربية السعودية</option>
-            <option value="ae">الإمارات العربية المتحدة</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-[10px] font-bold text-slate-500 mb-1">اختر المدينة:</label>
-          <select id="city-selector" onchange="handleCityChange()" class="w-full bg-slate-50 text-slate-800 text-xs font-bold rounded-xl p-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"></select>
-        </div>
-      </div>
-
-      <div class="pt-1">
-        <span class="text-[10px] font-bold text-slate-500 mb-1 block">نظام التوقيت الصيفي (DST):</span>
-        <button id="btn-toggle-dst" onclick="toggleDST()" class="flex items-center justify-between w-full bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl p-3 border border-slate-200 transition">
-          <span id="dst-status-text">توقيت شتوي</span>
-          <div class="w-8 h-4 bg-slate-300 rounded-full flex items-center p-0.5 transition" id="dst-toggle-bg">
-            <div class="bg-white w-3 h-3 rounded-full shadow transform translate-x-0 transition" id="dst-toggle-circle"></div>
-          </div>
-        </button>
-      </div>
-
-      <h3 class="font-bold text-slate-800 flex items-center gap-2 mb-3 mt-8 border-t border-slate-100 pt-5 text-sm">
-        <i data-lucide="bell-ring" class="w-5 h-5 text-emerald-600"></i>
-        <span>تخصيص الأذان والتنبيهات للصلوات</span>
-      </h3>
-      <div id="prayer-settings-list" class="space-y-3">
-        <!-- يتم توليد كروت الصلوات برمجياً هنا -->
-      </div>
-
-    </div>
-  </div>
-
-  <!-- صفحة موسوعة الأذكار الشاملة -->
-  <div id="tab-athkar" class="hidden max-w-md mx-auto w-full px-4 mt-4 space-y-4 pb-28 ios-scroll">
-    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-      <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-        <i data-lucide="book-open" class="w-5.5 h-5.5 text-emerald-600"></i>
-        <span>حصن المسلم - الأذكار الصحيحة</span>
-      </h2>
-      
-      <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none mb-2" id="athkar-categories-container"></div>
-
-      <div class="mt-4 space-y-4" id="athkar-items-container"></div>
-    </div>
-  </div>
-
-  <!-- صفحة القبلة -->
-  <div id="tab-qibla" class="hidden max-w-md mx-auto w-full px-4 mt-4 space-y-4 pb-28 text-center ios-scroll">
-    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col items-center">
-      <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2 justify-center">
-        <i data-lucide="compass" class="w-5.5 h-5.5 text-emerald-600"></i>
-        <span>تحديد اتجاه القبلة الكعبة المشرفة</span>
-      </h2>
-      <p class="text-[11px] text-slate-500 mb-6">ضع هاتفك على سطح مستوٍ وقم بتدويره، أو استخدم مؤشر الضبط اليدوي أدناه لتحديد القبلة بدقة</p>
-
-      <div id="compass-container" class="relative w-60 h-60 my-4 flex items-center justify-center">
-        <div id="compass-disc" class="absolute w-full h-full rounded-full border-4 border-emerald-950 bg-slate-50 shadow-md flex items-center justify-center transition-transform duration-150 ease-out" style="transform: rotate(0deg);">
-          <span class="absolute top-2 font-black text-xl text-rose-600">N</span>
-          <span class="absolute right-3 font-bold text-sm text-slate-400">E</span>
-          <span class="absolute bottom-2 font-bold text-sm text-slate-400">S</span>
-          <span class="absolute left-3 font-bold text-sm text-slate-400">W</span>
-          <div class="absolute w-[90%] h-[90%] rounded-full border border-dashed border-slate-200 pointer-events-none flex items-center justify-center"></div>
-          <div class="absolute w-12 h-12 flex flex-col items-center justify-center" id="makkah-target-indicator" style="transform: translateY(-80px);">
-            <i data-lucide="star" class="w-6 h-6 text-amber-500 fill-amber-500 animate-pulse"></i>
-            <span class="text-[8px] font-black text-emerald-950 bg-amber-300 px-1 rounded">الكعبة</span>
-          </div>
-        </div>
-        <div class="absolute z-10 text-emerald-950 flex flex-col items-center pointer-events-none">
-          <i data-lucide="navigation" class="w-14 h-14 text-emerald-700 fill-emerald-700 filter drop-shadow" style="transform: rotate(0deg);" id="main-qibla-arrow"></i>
-        </div>
-      </div>
-
-      <div class="w-full bg-slate-50 p-4 rounded-2xl border border-slate-150 mt-2 space-y-2">
-        <div class="flex justify-between items-center text-xs font-bold text-slate-600">
-          <span>تدوير البوصلة يدوياً:</span>
-          <span id="manual-angle-text" class="text-emerald-700 font-mono">0°</span>
-        </div>
-        <input type="range" id="qibla-manual-slider" min="0" max="359" value="0" oninput="handleManualCompassRotate(this.value)" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-700">
-      </div>
-
-      <div class="bg-emerald-50 text-emerald-900 rounded-2xl p-4 w-full mt-4 text-sm font-medium">
-        <span class="block text-xs text-emerald-700 mb-1">الزاوية الجغرافية للقبلة</span>
-        <span class="text-xl font-bold font-mono" id="qibla-angle-display">135°</span>
-        <span class="block text-[10px] text-slate-500 mt-2" id="qibla-sensor-message">البوصلة جاهزة للتوجيه التلقائي.</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- صفحة الأدعية الشاملة -->
-  <div id="tab-duas" class="hidden max-w-md mx-auto w-full px-4 mt-4 space-y-4 pb-28 ios-scroll">
-    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-          <i data-lucide="heart-handshake" class="w-5.5 h-5.5 text-emerald-600"></i>
-          <span>موسوعة الأدعية (الدرر السنية)</span>
-        </h2>
-      </div>
-
-      <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none mb-2">
-        <button onclick="renderDuas('jawami')" id="dua-btn-jawami" class="bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap shadow-sm">جوامع الدعاء</button>
-        <button onclick="renderDuas('quranic')" id="dua-btn-quranic" class="bg-slate-100 text-slate-600 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap hover:bg-slate-200 transition">أدعية قرآنية</button>
-        <button onclick="renderDuas('protection')" id="dua-btn-protection" class="bg-slate-100 text-slate-600 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap hover:bg-slate-200 transition">أدعية التحصين</button>
-        <button onclick="renderDuas('deceased')" id="dua-btn-deceased" class="bg-slate-100 text-slate-600 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap hover:bg-slate-200 transition">أدعية للمتوفى</button>
-        <button onclick="renderDuas('ai')" id="dua-btn-ai" class="bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap hover:scale-105 transition shadow-sm flex items-center gap-1">
-          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> المساعد الدعوي ✨
-        </button>
-      </div>
-
-      <div class="space-y-4 mt-4" id="duas-list-container"></div>
-    </div>
-  </div>
-
-  <!-- نافذة التنبيه المخصصة للأشعار والإشعارات -->
-  <div id="custom-notification-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-[2rem] p-6 max-w-xs w-full text-center shadow-2xl border border-amber-100 animate-in fade-in zoom-in-95 duration-200">
-      <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600">
-        <i data-lucide="bell-ring" class="w-8 h-8 animate-bounce"></i>
-      </div>
-      <h4 class="text-lg font-bold text-emerald-950 mb-1" id="notif-modal-title">تنبيه الصلاة</h4>
-      <p class="text-xs text-slate-600 mb-6" id="notif-modal-body">حان الآن موعد الأذان حسب توقيتك المحلي</p>
-      
-      
-<div class="space-y-2">
-  <button onclick="closeNotificationModal()" 
-    class="w-full bg-emerald-700 text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-emerald-800 transition active:scale-95 text-sm">
-    إيقاف الأذان
-  </button>
-</div>
-
-    </div>
-  </div>
-
-  <!-- مكون لتشغيل الأذان الصوتي -->
-  <audio id="adhan-player" src="" preload="auto"></audio>
-  <audio id="beep-player" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-700.wav" preload="auto"></audio>
-
-  <script>
-let audioContext;
-let audioBuffer = null;
-let currentAudioURL = null;
-let currentAdhanAudio = null;
-let isPlaying = false;
-
-async function loadAudio(url) {
-    // لو نفس الصوت لا تعيد التحميل ✅
-    if (currentAudioURL === url && audioBuffer) return;
-
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
-    audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-    currentAudioURL = url;
-}
-
-    const apiKey = "";
-    let userLatitude = 30.0444; 
-    let userLongitude = 31.2357; 
-    let activeTab = 'main';
-    let deferredPrompt = null;
-    let dstActive = false; 
-    let selectedCountry = 'eg'; 
-    let selectedCity = 'cairo'; 
-    let calculatedQiblaAngle = 135; 
-    // تعريف الدالة المرجعية عالمياً لمنع حدوث ReferenceError
-    let modalActionCallback = null;
-    // متغير لتتبع تغير الفرض ومنع تحديث الصفحة بشكل مفرط
-    let lastNextK = null;
-
-    // --- تكامل Gemini API ---
-    async function fetchFromGemini(prompt, retries = 5) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-        const payload = {
-            contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: "أنت مساعد إسلامي مفيد، لطيف، ومتخصص في تقديم الأدعية وشرح الأذكار بناءً على القرآن والسنة الصحيحة. أجب دائماً باللغة العربية بأسلوب محترم وهادئ ومريح للنفس. تجنب الإطالة، وقدم إجابات منسقة باستخدام HTML بسيط (مثل <br> و <strong>) إذا لزم الأمر." }] }
-        };
-
-        for (let i = 0; i < retries; i++) {
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text || "عذراً، لم أتمكن من توليد رد.";
-            } catch (error) {
-                const delay = Math.pow(2, i) * 1000;
-                await new Promise(res => setTimeout(res, delay));
-                if (i === retries - 1) return "عذراً، حدث خطأ في الاتصال بخادم الذكاء الاصطناعي. يرجى المحاولة لاحقاً.";
+        const initialProducts = [
+            { 
+                id: 'prod-1', 
+                code: 'PRD-1001', 
+                name: 'عبوة زجاجية فاخرة', 
+                caliber: 'درجة ممتازة A+', 
+                capacity: '500 مل', 
+                color: 'شفاف',
+                price: 299.99, 
+                cost: 140.00, 
+                stock: 45, 
+                reorderLevel: 15, 
+                warehouseId: 'wh-1',
+                packageImage: 'https://placehold.co/400x400/4f46e5/ffffff?text=صورة+العبوة+1',
+                labelImage: 'https://placehold.co/400x400/0891b2/ffffff?text=صورة+الملصق+1'
+            },
+            { 
+                id: 'prod-2', 
+                code: 'PRD-1002', 
+                name: 'عبوة بلاستيكية معالجة', 
+                caliber: 'معياري 21', 
+                capacity: '1000 مل', 
+                color: 'أبيض',
+                price: 549.50, 
+                cost: 320.00, 
+                stock: 12, 
+                reorderLevel: 10, 
+                warehouseId: 'wh-1',
+                packageImage: 'https://placehold.co/400x400/10b981/ffffff?text=صورة+العبوة+2',
+                labelImage: 'https://placehold.co/400x400/f59e0b/ffffff?text=صورة+الملصق+2'
+            },
+            { 
+                id: 'prod-3', 
+                code: 'PRD-1003', 
+                name: 'عبوة ألومنيوم مقواة', 
+                caliber: 'عيار 24 نقي', 
+                capacity: '250 جرام', 
+                color: 'فضي',
+                price: 119.00, 
+                cost: 55.00, 
+                stock: 85, 
+                reorderLevel: 20, 
+                warehouseId: 'wh-2',
+                packageImage: 'https://placehold.co/400x400/6366f1/ffffff?text=صورة+العبوة+3',
+                labelImage: 'https://placehold.co/400x400/ec4899/ffffff?text=صورة+الملصق+3'
+            },
+            { 
+                id: 'prod-4', 
+                code: 'PRD-1004', 
+                name: 'قارورة كرتونية عازلة', 
+                caliber: 'درجة أولى', 
+                capacity: '2 لتر', 
+                color: 'بني طبيعي',
+                price: 199.00, 
+                cost: 95.00, 
+                stock: 8, 
+                reorderLevel: 12, 
+                warehouseId: 'wh-2',
+                packageImage: 'https://placehold.co/400x400/8b5cf6/ffffff?text=صورة+العبوة+4',
+                labelImage: 'https://placehold.co/400x400/14b8a6/ffffff?text=صورة+الملصق+4'
+            },
+            { 
+                id: 'prod-5', 
+                code: 'PRD-1005', 
+                name: 'برطمان حماية مضاد للتسرب', 
+                caliber: 'عيار 18', 
+                capacity: '750 مل', 
+                color: 'أسود مطفي',
+                price: 159.99, 
+                cost: 70.00, 
+                stock: 60, 
+                reorderLevel: 15, 
+                warehouseId: 'wh-3',
+                packageImage: 'https://placehold.co/400x400/f97316/ffffff?text=صورة+العبوة+5',
+                labelImage: 'https://placehold.co/400x400/06b6d4/ffffff?text=صورة+الملصق+5'
             }
-        }
-    }
+        ];
 
-    async function generateAIDua() {
-        const input = document.getElementById('ai-dua-input').value.trim();
-        if (!input) return;
+        const initialCustomers = [
+            { id: 'cust-1', name: 'شركة أكمي للتكنولوجيا', email: 'info@acme-corp.com', phone: '+966 50 123 4567', address: 'طريق الملك فهد، الرياض', status: 'نشط' },
+            { id: 'cust-2', name: 'مؤسسة الحلول المبتكرة', email: 'contact@innovative.sa', phone: '+966 55 987 6543', address: 'شارع العليا، الرياض', status: 'نشط' },
+            { id: 'cust-3', name: 'مجموعة الاستشارات العالمية', email: 'billing@globaltech.com', phone: '+966 53 444 3322', address: 'حي الزهراء، جدة', status: 'نشط' },
+            { id: 'cust-4', name: 'استوديو أيبكس للتصميم', email: 'hello@apexdesign.co', phone: '+966 51 000 1122', address: 'حي الشاطئ، الدمام', status: 'نشط' }
+        ];
 
-        const btn = document.getElementById('ai-dua-btn');
-        const resultContainer = document.getElementById('ai-dua-result');
-        
-        btn.disabled = true;
-        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> <span>جاري التأمل والتوليد...</span>`;
-        lucide.createIcons({root: btn});
-        resultContainer.classList.remove('hidden');
-        resultContainer.innerHTML = '<div class="flex justify-center py-4"><div class="animate-pulse flex gap-1"><div class="w-2 h-2 bg-emerald-400 rounded-full"></div><div class="w-2 h-2 bg-emerald-400 rounded-full delay-75"></div><div class="w-2 h-2 bg-emerald-400 rounded-full delay-150"></div></div></div>';
+        const initialSalesOrders = [
+            { id: 'so-101', orderNo: 'SO-2026-001', customerId: 'cust-1', date: '2026-09-20', total: 1148.48, status: 'مكتمل', items: [{ productId: 'prod-1', qty: 2, price: 299.99 }, { productId: 'prod-2', qty: 1, price: 549.50 }] },
+            { id: 'so-102', orderNo: 'SO-2026-002', customerId: 'cust-2', date: '2026-09-24', total: 718.00, status: 'قيد المعالجة', items: [{ productId: 'prod-3', qty: 6, price: 119.00 }] },
+            { id: 'so-103', orderNo: 'SO-2026-003', customerId: 'cust-4', date: '2026-09-27', total: 199.00, status: 'معلق', items: [{ productId: 'prod-4', qty: 1, price: 199.00 }] }
+        ];
 
-        const prompt = `المستخدم يمر بالحالة التالية أو يطلب الدعاء لـ: "${input}". 
-        اكتب رداً قصيراً يبدأ بكلمة طيبة ومريحة للنفس، ثم صغ له دعاءً جميلاً مخصصاً لحالته، 
-        واختم بذكر دعاء واحد مأثور من السنة النبوية يناسب الموقف.`;
+        const initialPurchaseOrders = [
+            { id: 'po-501', poNo: 'PO-2026-088', supplier: 'شركة التقنية العالمية المحدودة', warehouseId: 'wh-1', date: '2026-09-15', total: 3200.00, status: 'تم الاستلام', items: [{ productId: 'prod-2', qty: 10, cost: 320.00 }] },
+            { id: 'po-502', poNo: 'PO-2026-089', supplier: 'مصنع الأثاث العصري', warehouseId: 'wh-2', date: '2026-09-25', total: 1140.00, status: 'معلق', items: [{ productId: 'prod-4', qty: 12, cost: 95.00 }] }
+        ];
 
-        const responseText = await fetchFromGemini(prompt);
-        
-        let formattedResponse = responseText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-        
-        resultContainer.innerHTML = formattedResponse;
-        btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4"></i> <span>توليد دعاء آخر</span>`;
-        lucide.createIcons({root: btn});
-    }
+        const Toast = ({ message, type, onClose }) => {
+            useEffect(() => {
+                const timer = setTimeout(onClose, 3500);
+                return () => clearTimeout(timer);
+            }, [onClose]);
 
-    async function explainThikr(type, index) {
-        const thikrItem = athkarData[type][index];
-        const explainContainer = document.getElementById(`ai-explain-${type}-${index}`);
-        const explainBtn = document.getElementById(`ai-btn-${type}-${index}`);
-        
-        if (!explainContainer.classList.contains('hidden') && explainContainer.innerHTML !== '') {
-            explainContainer.classList.add('hidden');
-            return;
-        }
+            const bgColor = type === 'error' ? 'bg-rose-600' : type === 'warning' ? 'bg-amber-500' : 'bg-emerald-600';
+            const icon = type === 'error' ? 'fa-circle-xmark' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-check';
 
-        explainBtn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> <span>جاري الشرح...</span>`;
-        lucide.createIcons({root: explainBtn});
-        explainContainer.classList.remove('hidden');
-        explainContainer.innerHTML = '<span class="animate-pulse">يتم الآن استخلاص الشرح من الذكاء الاصطناعي...</span>';
-
-        const prompt = `اشرح هذا الذكر باختصار شديد (فقرة واحدة فقط) وبيّن فضله أو ثوابه: "${thikrItem.text}"`;
-        const responseText = await fetchFromGemini(prompt);
-        
-        let formattedResponse = responseText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-        explainContainer.innerHTML = formattedResponse;
-        
-        explainBtn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> <span>إخفاء الشرح</span>`;
-        explainBtn.onclick = () => {
-             explainContainer.classList.add('hidden');
-             explainBtn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5"></i> <span>شرح الذكر ✨</span>`;
-             lucide.createIcons({root: explainBtn});
-             explainBtn.onclick = () => explainThikr(type, index);
+            return (
+                <div className={`fixed bottom-5 left-5 flex items-center gap-3 text-white px-5 py-3.5 rounded-xl shadow-2xl z-50 transition-all duration-300 animate-bounce ${bgColor}`}>
+                    <i className={`fa-solid ${icon} text-xl`}></i>
+                    <span className="font-semibold text-sm">{message}</span>
+                    <button onClick={onClose} className="mr-4 hover:opacity-75"><i className="fa-solid fa-xmark"></i></button>
+                </div>
+            );
         };
-        lucide.createIcons({root: explainBtn});
-    }
-    // ------------------------------------
 
-    // تعريف الصلوات والأسماء
-    const prayerKeysList = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-    const prayerNamesAr = { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' };
+        const Modal = ({ isOpen, onClose, title, children }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+                    <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+                            <h3 className="font-bold text-lg text-slate-800">{title}</h3>
+                            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition">
+                                <i className="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto flex-1">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
 
-    // الإعدادات الافتراضية
-    let prayerSettings = {
-        fajr: { voice: 'fajr_specific', alarmBefore: 15, muted: false },
-        dhuhr: { voice: 'makkah', alarmBefore: 15, muted: false },
-        asr: { voice: 'makkah', alarmBefore: 15, muted: false },
-        maghrib: { voice: 'makkah', alarmBefore: 15, muted: false },
-        isha: { voice: 'makkah', alarmBefore: 15, muted: false }
-    };
-
-    // روابط ملفات الأذان الشاملة
-    const adhanAudioFiles = {
-        makkah: { name: "الحرم المكي", url: "mp3/mkaah.mp3"  },
-        madinah: { name: "المدينة المنورة", url: "mp3/madenah.mp3" },
-        hosary: { name: "الحصري", url: "mp3/hosari.mp3" },
-        egypt: { name: "محمود علي البنا", url: "mp3/bnna.mp3" },
-        abdulbasit: { name: "أذان عبد الباسط", url: "mp3/abdelbasset.mp3" },
-        fajr_specific: { name: "أذان الفجر نصر الدين طوبار", url: "mp3/fagr-nsr.mp3" },
-        qtami: { name: "القطامي", url: "mp3/qtami.mp3" }, 
-        nsreldeen: { name: "نصرالدين طوبار", url: "mp3/nsreldeen.mp3"},
-        ref3at: { name: "محمد رفعت",  url: "mp3/ref3at.mp3" }
-
-    };
-
-    // الدول والمدن
-    const worldCountries = {
-        eg: {
-        name: "مصر", method: "Egypt",
-        cities: { cairo: { name: "القاهرة", lat: 30.0444, lon: 31.2357 }, alexandria: { name: "الإسكندرية", lat: 31.2001, lon: 29.9187 }, giza: { name: "الجيزة", lat: 30.0131, lon: 31.2089 },
-                  tanta: { name: "طنطا", lat: 30.7865, lon: 31.0004 }, mansoura: { name: "المنصورة", lat: 31.0409, lon: 31.3785 }, asyut: { name: "أسيوط", lat: 27.1783, lon: 31.1859 } }
-        },
-        sa: {
-        name: "السعودية", method: "Makkah",
-        cities: { makkah: { name: "مكة المكرمة", lat: 21.4225, lon: 39.8262 }, madinah: { name: "المدينة المنورة", lat: 24.4672, lon: 39.6111 }, riyadh: { name: "الرياض", lat: 24.7136, lon: 46.6753 },
-                  jeddah: { name: "جدة", lat: 21.5433, lon: 39.1728 }, dammam: { name: "الدمام", lat: 26.4207, lon: 50.0888 } }
-        },
-        ae: {
-        name: "الإمارات", method: "Gulf",
-        cities: { abu_dhabi: { name: "أبوظبي", lat: 24.4539, lon: 54.3773 }, dubai: { name: "دبي", lat: 25.2048, lon: 55.2708 }, sharjah: { name: "الشارقة", lat: 25.3463, lon: 55.4209 } }
-        }
-    };
-
-    const athkarCategories = [
-        { id: 'morning', name: 'أذكار الصباح' },
-        { id: 'evening', name: 'أذكار المساء' },
-        { id: 'after_prayer', name: 'بعد الصلاة' },
-        { id: 'sleep', name: 'أذكار النوم' },
-        { id: 'wake', name: 'الاستيقاظ' },
-        { id: 'mosque', name: 'أذكار المسجد' }
-    ];
-
-    const athkarData = {
-        morning: [
-            { text: "آيَةُ الْكُرْسِيِّ: اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ...", count: 1, current: 0 },
-            { text: "قراءة سورة الإخلاص وسورة الفلق وسورة الناس.", count: 3, current: 0 },
-            { text: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ...", count: 1, current: 0 },
-            { text: "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ.", count: 1, current: 0 },
-            { text: "سَيِّدُ الاِسْتِغْفَارِ: اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ...", count: 1, current: 0 },
-            { text: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ فِي الدُّنْيَا وَالآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي.", count: 1, current: 0 },
-            { text: "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ.", count: 3, current: 0 },
-            { text: "رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ نَبِيًّا.", count: 3, current: 0 },
-            { text: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ: عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ.", count: 3, current: 0 }
-        ],
-        evening: [
-            { text: "آيَةُ الْكُرْسِيِّ: اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...", count: 1, current: 0 },
-            { text: "قراءة سورة الإخلاص وسورة الفلق وسورة الناس.", count: 3, current: 0 },
-            { text: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ...", count: 1, current: 0 },
-            { text: "اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ الْمَصِيرُ.", count: 1, current: 0 },
-            { text: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ...", count: 1, current: 0 },
-            { text: "أَعُوذُ بِكَلِمَاتِ اللهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ.", count: 3, current: 0 }
-        ],
-        after_prayer: [
-            { text: "أَسْتَغْفِرُ اللهَ (ثلاثاً)، اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ.", count: 1, current: 0 },
-            { text: "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ.", count: 1, current: 0 },
-            { text: "اللَّهُمَّ لَا مَانِعَ لِمَا أَعْطَيْتَ، وَلَا مُعْطِيَ لِمَا مَنَعْتَ، وَلَا يَنْفَعُ ذَا الْجَدِّ مِنْكَ الْجَدُّ.", count: 1, current: 0 },
-            { text: "سُبْحَانَ اللهِ (33)، الْحَمْدُ للهِ (33)، اللهُ أَكْبَرُ (33).", count: 1, current: 0 },
-            { text: "تَمَامُ الْمِائَةِ: لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ.", count: 1, current: 0 }
-        ],
-        sleep: [
-            { text: "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ، فَإِنْ أَمْسَكْتَ نَفْسِي فَارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِينَ.", count: 1, current: 0 },
-            { text: "اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ.", count: 3, current: 0 },
-            { text: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا.", count: 1, current: 0 },
-            { text: "سُبْحَانَ اللَّهِ (33 مرة)، الْحَمْدُ لِلَّهِ (33 مرة)، اللَّهُ أَكْبَرُ (34 مرة).", count: 1, current: 0 }
-        ],
-        wake: [
-            { text: "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ.", count: 1, current: 0 },
-            { text: "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَلَا إِلَهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ الْعَلِيِّ الْعَظِيمِ، اللَّهُمَّ اغْفِرْ لِي.", count: 1, current: 0 }
-        ],
-        mosque: [
-            { text: "دُعَاءُ الذَّهَابِ إِلَى الْمَسْجِدِ: اللَّهُمَّ اجْعَلْ فِي قَلْبِي نُورًا، وَفِي بَصَرِي نُورًا، وَفِي سَمْعِي نُورًا، وَعَنْ يَمِينِي نُورًا، وَعَنْ يَسَارِي نُورًا، وَفَوْقِي نُورًا، وَتَحْتِي نُورًا، وَأَمَامِي نُورًا، وَخَلْفِي نُورًا، وَاجْعَلْ لِي نُورًا.", count: 1, current: 0 },
-            { text: "دُعَاءُ دُخُولِ الْمَسْجِدِ: أَعُوذُ بِاللَّهِ الْعَظِيمِ، وَبِوَجْهِهِ الْكَرِيمِ، وَسُلْطَانِهِ الْقَدِيمِ، مِنَ الشَّيْطَانِ الرَّجِيمِ. بِسْمِ اللَّهِ، وَالصَّلَاةُ وَالسَّلَامُ عَلَى رَسُولِ اللَّهِ، اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ.", count: 1, current: 0 },
-            { text: "دُعَاءُ الْخُرُوجِ مِنَ الْمَسْجِدِ: بِسْمِ اللَّهِ وَالصَّلَاةُ وَالسَّلَامُ عَلَى رَسُولِ اللَّهِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ، اللَّهُمَّ اعْصِمْنِي مِنَ الشَّيْطَانِ الرَّجِيمِ.", count: 1, current: 0 }
-        ]
-    };
-
-    const dorarDuasData = {
-        jawami: [
-            { text: "اللَّهُمَّ رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً، وَفِي الآخِرَةِ حَسَنَةً، وَقِنَا عَذَابَ النَّارِ.", source: "متفق عليه" },
-            { text: "اللَّهُمَّ إنِّي أَسْأَلُكَ الهُدَى وَالتُّقَى، وَالعَفَافَ وَالغِنَى.", source: "رواه مسلم" },
-            { text: "اللَّهُمَّ اغْفِرْ لي خَطِيئَتي وَجَهْلِي، وإسْرَافِي في أَمْرِي، وَما أَنْتَ أَعْلَمُ به مِنِّي، اللَّهُمَّ اغْفِرْ لي جِدِّي وَهَزْلِي، وَخَطَئِي وَعَمْدِي، وَكُلُّ ذلكَ عِندِي.", source: "متفق عليه" },
-            { text: "اللَّهُمَّ أَصْلِحْ لي دِينِي الذي هو عِصْمَةُ أَمْرِي، وَأَصْلِحْ لي دُنْيَايَ الَّتي فِيهَا معاشِي، وَأَصْلِحْ لي آخِرَتي الَّتي فِيهَا معادِي، وَاجْعَلِ الحَيَاةَ زِيَادَةً لي في كُلِّ خَيْرٍ، وَاجْعَلِ المَوْتَ رَاحَةً لي مِن كُلِّ شَرٍّ.", source: "رواه مسلم" },
-            { text: "يَا مُقَلِّبَ القُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ.", source: "رواه الترمذي وصححه الألباني" }
-        ],
-        quranic: [
-            { text: "رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِن لَّدُنكَ رَحْمَةً ۚ إِنَّكَ أَنتَ الْوَهَّابُ.", source: "سورة آل عمران: 8" },
-            { text: "رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِن ذُرِّيَّتِي ۚ رَبَّنَا وَتَقَبَّلْ دُعَاءِ.", source: "سورة إبراهيم: 40" },
-            { text: "رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا.", source: "سورة الفرقان: 74" }
-        ],
-        protection: [
-            { text: "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ. (ثلاث مرات)", source: "رواه أبو داود والترمذي" },
-            { text: "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ. (ثلاث مرات)", source: "رواه مسلم" },
-            { text: "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَالْعَجْزِ وَالْكَسَلِ، وَالْبُخْلِ وَالْجُبْنِ، وَضَلَعِ الدَّيْنِ، وَغَلَبَةِ الرِّجَالِ.", source: "رواه البخاري" }
-        ],
-        deceased: [
-            { text: "اللَّهُمَّ اغْفِرْ له وَارْحَمْهُ، وَعَافِهِ وَاعْفُ عنْه، وَأَكْرِمْ نُزُلَهُ، وَوَسِّعْ مُدْخَلَهُ، وَاغْسِلْهُ بالمَاءِ وَالثَّلْجِ وَالْبَرَدِ، وَنَقِّهِ مِنَ الخَطَايَا كما نَقَّيْتَ الثَّوْبَ الأبْيَضَ مِنَ الدَّنَسِ.", source: "رواه مسلم" },
-            { text: "اللَّهُمَّ اغْفِرْ لِحَيِّنَا وَمَيِّتِنَا، وَشَاهِدِنَا وَغَائِبِنَا، وَصَغِيرِنَا وَكَبِيرِنَا، وَذَكَرِنَا وَأُنْثَانَا.", source: "رواه الترمذي" }
-        ]
-    };
-
-    const hadithsList = [
-        { text: "إنَّما الأعْمالُ بالنِّيَّاتِ، وإنَّما لِكُلِّ امْرِئٍ ما نَوَى...", rawi: "رواه البخاري ومسلم" },
-        { text: "مَن سَلَكَ طَرِيقًا يَلْتَمِسُ فيه عِلْمًا، سَهَّلَ اللَّهُ له به طَرِيقًا إلى الجَنَّةِ.", rawi: "رواه مسلم" },
-        { text: "الْمُؤْمِنُ القَوِيُّ، خَيْرٌ وَأَحَبُّ إلَى اللهِ مِنَ المُؤْمِنِ الضَّعِيفِ...", rawi: "رواه مسلم" }
-    ];
-
-    window.onload = function () {
-
-        setupPWA();
-        loadUserSettings();
-        initPrayerSettingsUI();
-        initAthkarCategoriesUI();
-        updateTimesAndDates();
-        setDailyHadith();
-        initTracker();
-        initFastingReminders();
-
-        setInterval(runAppClock, 1000);
-
-        lucide.createIcons();
-
-        // ✅ إخفاء Splash
-        setTimeout(() => {
-            const splash = document.getElementById("splash-screen");
-
-            splash.style.opacity = "0";
-
-            setTimeout(() => {
-                splash.remove();
-            }, 700);
-
-        }, 2200);
-    };
-
-
-    function setupPWA() {
-        if ('serviceWorker' in navigator) {
-            const swBlob = new Blob([`self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));`], { type: 'application/javascript' });
-            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => console.log(err));
-        }
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); deferredPrompt = e;
-            document.getElementById('pwa-install-banner').classList.remove('hidden');
-        });
-    }
-
-    function installPWA() {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-            document.getElementById('pwa-install-banner').classList.add('hidden');
-            deferredPrompt = null;
-        });
-    }
-
-    function loadUserSettings() {
-        dstActive = localStorage.getItem('dst_active') === 'true' || false;
-        updateDST_UI();
-
-        selectedCountry = localStorage.getItem('selected_country') || 'eg';
-        document.getElementById('country-selector').value = selectedCountry;
-        populateCitiesDropdown();
-        
-        selectedCity = localStorage.getItem('selected_city') || (selectedCountry === 'eg' ? 'cairo' : Object.keys(worldCountries[selectedCountry].cities)[0]);
-        document.getElementById('city-selector').value = selectedCity;
-
-        const savedSettings = localStorage.getItem('prayer_advanced_settings');
-        if (savedSettings) {
-            prayerSettings = JSON.parse(savedSettings);
-        }
-
-        applyLocationAndCalculate();
-    }
-
-    function savePrayerSettings() {
-        localStorage.setItem('prayer_advanced_settings', JSON.stringify(prayerSettings));
-        updateMainPrayerListIcons();
-    }
-
-    function initPrayerSettingsUI() {
-        const container = document.getElementById('prayer-settings-list');
-        container.innerHTML = '';
-        
-        prayerKeysList.forEach(key => {
-            const pSetting = prayerSettings[key];
-            const div = document.createElement('div');
-            div.className = "bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-3";
+        function App() {
+            // حالة التطبيق والتنقل
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [products, setProducts] = useState(() => JSON.parse(localStorage.getItem('nexerp_ar_products')) || initialProducts);
+            const [warehouses, setWarehouses] = useState(() => JSON.parse(localStorage.getItem('nexerp_ar_warehouses')) || initialWarehouses);
+            const [customers, setCustomers] = useState(() => JSON.parse(localStorage.getItem('nexerp_ar_customers')) || initialCustomers);
+            const [salesOrders, setSalesOrders] = useState(() => JSON.parse(localStorage.getItem('nexerp_ar_sales')) || initialSalesOrders);
+            const [purchaseOrders, setPurchaseOrders] = useState(() => JSON.parse(localStorage.getItem('nexerp_ar_purchases')) || initialPurchaseOrders);
             
-            let audioOptions = '';
-            for(let v in adhanAudioFiles) {
-                const selected = pSetting.voice === v ? 'selected' : '';
-                audioOptions += `<option value="${v}" ${selected}>${adhanAudioFiles[v].name}</option>`;
-            }
+            // حالة التنبيهات
+            const [toast, setToast] = useState(null);
+            const showToast = (message, type = 'success') => setToast({ message, type });
 
-            const times = [5, 10, 15, 20, 30];
-            let timeOptions = '';
-            times.forEach(t => {
-                const selected = pSetting.alarmBefore == t ? 'selected' : '';
-                timeOptions += `<option value="${t}" ${selected}>قبل ${t} دقائق</option>`;
+            // حالة النوافذ المنبثقة
+            const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+            const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
+            const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+            const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+            const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+
+            // حفظ التغييرات في التخزين المحلي
+            useEffect(() => { localStorage.setItem('nexerp_ar_products', JSON.stringify(products)); }, [products]);
+            useEffect(() => { localStorage.setItem('nexerp_ar_warehouses', JSON.stringify(warehouses)); }, [warehouses]);
+            useEffect(() => { localStorage.setItem('nexerp_ar_customers', JSON.stringify(customers)); }, [customers]);
+            useEffect(() => { localStorage.setItem('nexerp_ar_sales', JSON.stringify(salesOrders)); }, [salesOrders]);
+            useEffect(() => { localStorage.setItem('nexerp_ar_purchases', JSON.stringify(purchaseOrders)); }, [purchaseOrders]);
+
+            // قائمة المنتجات منخفضة المخزون
+            const lowStockItems = useMemo(() => {
+                return products.filter(p => p.stock <= p.reorderLevel);
+            }, [products]);
+
+            // إضافة منتج جديد
+            const handleAddProduct = (newProd) => {
+                const prod = {
+                    ...newProd,
+                    id: 'prod-' + Date.now(),
+                    price: parseFloat(newProd.price),
+                    cost: parseFloat(newProd.cost),
+                    stock: parseInt(newProd.stock),
+                    reorderLevel: parseInt(newProd.reorderLevel)
+                };
+                setProducts([...products, prod]);
+                setIsProductModalOpen(false);
+                showToast(`تم إضافة المنتج "${prod.name}" بنجاح!`);
+            };
+
+            // إضافة عميل جديد
+            const handleAddCustomer = (newCust) => {
+                const cust = { ...newCust, id: 'cust-' + Date.now(), status: 'نشط' };
+                setCustomers([...customers, cust]);
+                setIsCustomerModalOpen(false);
+                showToast(`تم تسجيل العميل "${cust.name}" بنجاح!`);
+            };
+
+            // إنشاء أمر بيع وخصم المخزون تلقائياً
+            const handleCreateSalesOrder = (soData) => {
+                // التحقق من توفر الكميات
+                for (const item of soData.items) {
+                    const product = products.find(p => p.id === item.productId);
+                    if (!product || product.stock < item.qty) {
+                        showToast(`المخزون غير كافٍ للمنتج ${product ? product.name : 'المحدد'}!`, 'error');
+                        return;
+                    }
+                }
+
+                // خصم الكميات من المخزون
+                setProducts(prevProducts => prevProducts.map(p => {
+                    const orderedItem = soData.items.find(i => i.productId === p.id);
+                    if (orderedItem) {
+                        return { ...p, stock: p.stock - parseInt(orderedItem.qty) };
+                    }
+                    return p;
+                }));
+
+                const newSO = {
+                    id: 'so-' + Date.now(),
+                    orderNo: `SO-2026-${Math.floor(100 + Math.random() * 900)}`,
+                    customerId: soData.customerId,
+                    date: new Date().toISOString().split('T')[0],
+                    status: 'قيد المعالجة',
+                    items: soData.items,
+                    total: soData.total
+                };
+
+                setSalesOrders([newSO, ...salesOrders]);
+                setIsSalesModalOpen(false);
+                showToast(`تم إصدار أمر البيع ${newSO.orderNo} وتحديث المخزون.`);
+            };
+
+            // إنشاء أمر شراء والتعامل مع استلام البضائع
+            const handleCreatePurchaseOrder = (poData) => {
+                const newPO = {
+                    id: 'po-' + Date.now(),
+                    poNo: `PO-2026-${Math.floor(100 + Math.random() * 900)}`,
+                    supplier: poData.supplier,
+                    warehouseId: poData.warehouseId,
+                    date: new Date().toISOString().split('T')[0],
+                    status: poData.receiveNow ? 'تم الاستلام' : 'معلق',
+                    items: poData.items,
+                    total: poData.total
+                };
+
+                if (poData.receiveNow) {
+                    // زيادة المخزون فوراً
+                    setProducts(prevProducts => prevProducts.map(p => {
+                        const poItem = poData.items.find(i => i.productId === p.id);
+                        if (poItem) {
+                            return { ...p, stock: p.stock + parseInt(poItem.qty) };
+                        }
+                        return p;
+                    }));
+                }
+
+                setPurchaseOrders([newPO, ...purchaseOrders]);
+                setIsPurchaseModalOpen(false);
+                showToast(`تم إنشاء أمر الشراء ${newPO.poNo}! ${poData.receiveNow ? 'تم إيداع المنتجات بالمخزن.' : ''}`);
+            };
+
+            // تأكيد استلام أمر شراء معلق
+            const handleReceivePO = (poId) => {
+                const po = purchaseOrders.find(p => p.id === poId);
+                if (!po || po.status === 'تم الاستلام') return;
+
+                // إيداع الشحنة في المخزن
+                setProducts(prevProducts => prevProducts.map(p => {
+                    const poItem = po.items.find(i => i.productId === p.id);
+                    if (poItem) {
+                        return { ...p, stock: p.stock + parseInt(poItem.qty) };
+                    }
+                    return p;
+                }));
+
+                // تحديث حالة أمر الشراء
+                setPurchaseOrders(prev => prev.map(p => p.id === poId ? { ...p, status: 'تم الاستلام' } : p));
+                showToast(`تم استلام شحنة أمر الشراء ${po.poNo} في المستودع!`);
+            };
+
+            // نقل الكميات بين المستودعات
+            const handleStockTransfer = (transferData) => {
+                const { productId, fromWarehouseId, toWarehouseId, qty } = transferData;
+                const quantity = parseInt(qty);
+                const product = products.find(p => p.id === productId);
+
+                if (!product || product.stock < quantity) {
+                    showToast('الكمية المتوفرة في المخزن غير كافية للنقل!', 'error');
+                    return;
+                }
+
+                // تغيير المستودع المخصص للمنتج
+                setProducts(prev => prev.map(p => {
+                    if (p.id === productId) {
+                        return { ...p, warehouseId: toWarehouseId };
+                    }
+                    return p;
+                }));
+
+                setIsTransferModalOpen(false);
+                showToast(`تم نقل ${quantity} وحدة من ${product.name} إلى المستودع المستهدف.`);
+            };
+
+            // إعادة ضبط البيانات الافتراضية
+            const handleResetData = () => {
+                setProducts(initialProducts);
+                setWarehouses(initialWarehouses);
+                setCustomers(initialCustomers);
+                setSalesOrders(initialSalesOrders);
+                setPurchaseOrders(initialPurchaseOrders);
+                localStorage.clear();
+                showToast('تمت إعادة ضبط البيانات الافتراضية بنجاح!', 'warning');
+            };
+
+            return (
+                <div className="flex h-screen overflow-hidden bg-slate-100">
+                    
+                    {/* التنبيهات المنبثقة */}
+                    {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
+                    {/* القائمة الجانبية للتنقل */}
+                    <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex border-l border-slate-800">
+                        <div>
+                            {/* شعار النظام */}
+                            <div className="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-indigo-500/30">
+                                    ن
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-white text-lg tracking-wide leading-tight">نيكس ERP</span>
+                                    <span className="text-[10px] text-slate-400">إدارة المشاريع المتكاملة</span>
+                                </div>
+                            </div>
+
+                            {/* عناصر القائمة الجانبية */}
+                            <nav className="p-4 space-y-1.5">
+                                <p className="px-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">الوحدات الرئيسية</p>
+                                
+                                <NavItem 
+                                    icon="fa-chart-pie" 
+                                    label="لوحة التحكم" 
+                                    active={activeTab === 'dashboard'} 
+                                    onClick={() => setActiveTab('dashboard')} 
+                                />
+                                <NavItem 
+                                    icon="fa-box-archive" 
+                                    label="المنتجات والمخزون" 
+                                    badge={lowStockItems.length ? lowStockItems.length : null}
+                                    active={activeTab === 'products'} 
+                                    onClick={() => setActiveTab('products')} 
+                                />
+                                <NavItem 
+                                    icon="fa-warehouse" 
+                                    label="المستودعات والمخازن" 
+                                    active={activeTab === 'repository'} 
+                                    onClick={() => setActiveTab('repository')} 
+                                />
+                                <NavItem 
+                                    icon="fa-file-invoice-dollar" 
+                                    label="أوامر البيع" 
+                                    active={activeTab === 'sales'} 
+                                    onClick={() => setActiveTab('sales')} 
+                                />
+                                <NavItem 
+                                    icon="fa-cart-flatbed" 
+                                    label="أوامر الشراء" 
+                                    active={activeTab === 'purchase'} 
+                                    onClick={() => setActiveTab('purchase')} 
+                                />
+                                <NavItem 
+                                    icon="fa-users" 
+                                    label="إدارة العملاء (CRM)" 
+                                    active={activeTab === 'customers'} 
+                                    onClick={() => setActiveTab('customers')} 
+                                />
+                            </nav>
+                        </div>
+
+                        {/* أسفل القائمة الجانبية */}
+                        <div className="p-4 border-t border-slate-800 space-y-3">
+                            <button 
+                                onClick={handleResetData}
+                                className="w-full flex items-center justify-center gap-2 text-xs text-slate-400 hover:text-rose-400 py-2.5 border border-slate-800 rounded-xl hover:border-rose-900/50 hover:bg-rose-950/20 transition font-medium"
+                            >
+                                <i className="fa-solid fa-rotate-right"></i>
+                                <span>استعادة البيانات الافتراضية</span>
+                            </button>
+
+                            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-slate-800/60 border border-slate-800">
+                                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">
+                                    م
+                                </div>
+                                <div className="flex-1 overflow-hidden">
+                                    <p className="text-xs font-semibold text-slate-200 truncate">مدير النظام</p>
+                                    <p className="text-[10px] text-slate-400 truncate">admin@nexerp.sa</p>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* منطقة المحتوى الرئيسية */}
+                    <div className="flex-1 flex flex-col h-screen overflow-hidden">
+                        
+                        {/* الشريط العلوي */}
+                        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10">
+                            {/* العنوان واستجابة الهاتف */}
+                            <div className="flex items-center gap-3">
+                                <div className="md:hidden flex items-center">
+                                    <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">ن</div>
+                                </div>
+                                <h1 className="text-lg font-bold text-slate-800">
+                                    {activeTab === 'dashboard' && 'لوحة التحكم الاستراتيجية'}
+                                    {activeTab === 'products' && 'كتالوج المنتجات والمخزون'}
+                                    {activeTab === 'repository' && 'إدارة المستودعات والمراكز اللوجستية'}
+                                    {activeTab === 'sales' && 'سجل أوامر البيع والمبيعات'}
+                                    {activeTab === 'purchase' && 'إدارة المشتريات والموردين'}
+                                    {activeTab === 'customers' && 'دليل العملاء والحسابات'}
+                                </h1>
+                            </div>
+
+                            {/* الإجراءات السريعة */}
+                            <div className="flex items-center gap-3">
+                                {lowStockItems.length > 0 && (
+                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs font-bold">
+                                        <i className="fa-solid fa-triangle-exclamation text-amber-500 animate-pulse"></i>
+                                        <span>{lowStockItems.length} تنبيه مخزون منخفض</span>
+                                    </div>
+                                )}
+
+                                {/* زر القائمة المنسدلة للإضافة */}
+                                <div className="relative group">
+                                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-indigo-200 flex items-center gap-2 transition">
+                                        <i className="fa-solid fa-plus"></i>
+                                        <span>إجراء جديد</span>
+                                    </button>
+                                    <div className="absolute left-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-xl hidden group-hover:block z-50 p-1.5">
+                                        <button onClick={() => setIsSalesModalOpen(true)} className="w-full text-right px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl flex items-center gap-2">
+                                            <i className="fa-solid fa-file-invoice text-indigo-500"></i>
+                                            <span>أمر بيع جديد</span>
+                                        </button>
+                                        <button onClick={() => setIsPurchaseModalOpen(true)} className="w-full text-right px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl flex items-center gap-2">
+                                            <i className="fa-solid fa-cart-shopping text-emerald-500"></i>
+                                            <span>أمر شراء جديد</span>
+                                        </button>
+                                        <button onClick={() => setIsProductModalOpen(true)} className="w-full text-right px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl flex items-center gap-2">
+                                            <i className="fa-solid fa-box text-amber-500"></i>
+                                            <span>إضافة منتج</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+
+                        {/* تبديل الشاشات Dynamic Views */}
+                        <main className="flex-1 overflow-y-auto p-6">
+                            {activeTab === 'dashboard' && (
+                                <DashboardView 
+                                    products={products} 
+                                    salesOrders={salesOrders} 
+                                    purchaseOrders={purchaseOrders} 
+                                    customers={customers}
+                                    warehouses={warehouses}
+                                    onNavigate={(tab) => setActiveTab(tab)}
+                                    onOpenSalesModal={() => setIsSalesModalOpen(true)}
+                                    onOpenPOModal={() => setIsPurchaseModalOpen(true)}
+                                />
+                            )}
+
+                            {activeTab === 'products' && (
+                                <ProductsView 
+                                    products={products} 
+                                    warehouses={warehouses}
+                                    onOpenAddModal={() => setIsProductModalOpen(true)} 
+                                />
+                            )}
+
+                            {activeTab === 'repository' && (
+                                <RepositoryView 
+                                    warehouses={warehouses} 
+                                    products={products}
+                                    onOpenTransferModal={() => setIsTransferModalOpen(true)}
+                                />
+                            )}
+
+                            {activeTab === 'sales' && (
+                                <SalesView 
+                                    salesOrders={salesOrders} 
+                                    customers={customers} 
+                                    products={products}
+                                    onOpenCreateModal={() => setIsSalesModalOpen(true)} 
+                                />
+                            )}
+
+                            {activeTab === 'purchase' && (
+                                <PurchaseView 
+                                    purchaseOrders={purchaseOrders} 
+                                    warehouses={warehouses}
+                                    products={products}
+                                    onOpenCreateModal={() => setIsPurchaseModalOpen(true)}
+                                    onReceivePO={handleReceivePO}
+                                />
+                            )}
+
+                            {activeTab === 'customers' && (
+                                <CustomersView 
+                                    customers={customers} 
+                                    salesOrders={salesOrders}
+                                    onOpenAddModal={() => setIsCustomerModalOpen(true)} 
+                                />
+                            )}
+                        </main>
+                    </div>
+
+                    {/* النوافذ المنبثقة Modals */}
+                    
+                    {/* إضافة منتج */}
+                    <Modal isOpen={isProductModalOpen} onClose={() => setIsProductModalOpen(false)} title="إضافة منتج جديد لكتالوج المخزون">
+                        <ProductForm warehouses={warehouses} onSubmit={handleAddProduct} />
+                    </Modal>
+
+                    {/* إضافة عميل */}
+                    <Modal isOpen={isCustomerModalOpen} onClose={() => setIsCustomerModalOpen(false)} title="تسجيل بيانات عميل جديد">
+                        <CustomerForm onSubmit={handleAddCustomer} />
+                    </Modal>
+
+                    {/* إنشاء أمر بيع */}
+                    <Modal isOpen={isSalesModalOpen} onClose={() => setIsSalesModalOpen(false)} title="إصدار أمر بيع جديد">
+                        <SalesOrderForm customers={customers} products={products} onSubmit={handleCreateSalesOrder} />
+                    </Modal>
+
+                    {/* إنشاء أمر شراء */}
+                    <Modal isOpen={isPurchaseModalOpen} onClose={() => setIsPurchaseModalOpen(false)} title="إنشاء أمر شراء من المورد">
+                        <PurchaseOrderForm warehouses={warehouses} products={products} onSubmit={handleCreatePurchaseOrder} />
+                    </Modal>
+
+                    {/* نقل الكميات بين المستودعات */}
+                    <Modal isOpen={isTransferModalOpen} onClose={() => setIsTransferModalOpen(false)} title="مناقلة المخزون بين المستودعات">
+                        <StockTransferForm warehouses={warehouses} products={products} onSubmit={handleStockTransfer} />
+                    </Modal>
+
+                </div>
+            );
+        }
+
+        const NavItem = ({ icon, label, active, onClick, badge }) => (
+            <button
+                onClick={onClick}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition duration-150 ${
+                    active 
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' 
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                }`}
+            >
+                <div className="flex items-center gap-3">
+                    <i className={`fa-solid ${icon} w-4 text-center text-sm`}></i>
+                    <span>{label}</span>
+                </div>
+                {badge && (
+                    <span className="bg-amber-400 text-slate-950 font-extrabold px-2 py-0.5 rounded-full text-[10px]">
+                        {badge}
+                    </span>
+                )}
+            </button>
+        );
+
+        function DashboardView({ products, salesOrders, purchaseOrders, customers, warehouses, onNavigate, onOpenSalesModal, onOpenPOModal }) {
+            const totalRevenue = salesOrders.reduce((sum, so) => sum + so.total, 0);
+            const totalPurchaseCost = purchaseOrders.reduce((sum, po) => sum + po.total, 0);
+            const totalStockUnits = products.reduce((sum, p) => sum + p.stock, 0);
+            const lowStockCount = products.filter(p => p.stock <= p.reorderLevel).length;
+
+            return (
+                <div className="space-y-6 max-w-7xl mx-auto">
+                    
+                    {/* بانر الترحيب */}
+                    <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+                        <div className="absolute left-0 top-0 bottom-0 opacity-10 flex items-center pl-10 text-9xl pointer-events-none">
+                            <i className="fa-solid fa-chart-line"></i>
+                        </div>
+                        <div className="relative z-10 max-w-2xl">
+                            <h2 className="text-2xl font-black mb-2">مرحباً بك في نظام NexERP</h2>
+                            <p className="text-slate-300 text-xs leading-relaxed mb-5">
+                                نظرة عامة فورية على مستويات المخزون، حركة المبيعات، مشتريات الموردين، وإدارة علاقات العملاء.
+                            </p>
+                            <div className="flex items-center gap-3">
+                                <button onClick={onOpenSalesModal} className="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-md shadow-indigo-500/20">
+                                    <i className="fa-solid fa-plus ml-1.5"></i> أمر بيع جديد
+                                </button>
+                                <button onClick={onOpenPOModal} className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition">
+                                    <i className="fa-solid fa-cart-shopping ml-1.5"></i> طلب توريد
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* بطاقات المؤشرات KPIs */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <KpiCard 
+                            title="إجمالي إيرادات المبيعات" 
+                            value={`$${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2})}`} 
+                            icon="fa-sack-dollar" 
+                            color="indigo"
+                            subText={`${salesOrders.length} أوامر بيع منفذة / معلقة`}
+                        />
+                        <KpiCard 
+                            title="إنفاق المشتريات" 
+                            value={`$${totalPurchaseCost.toLocaleString(undefined, {minimumFractionDigits: 2})}`} 
+                            icon="fa-cart-shopping" 
+                            color="emerald"
+                            subText={`${purchaseOrders.length} أوامر شراء من الموردين`}
+                        />
+                        <KpiCard 
+                            title="المخزون المتوفر" 
+                            value={`${totalStockUnits} قطعة`} 
+                            icon="fa-boxes-stacked" 
+                            color="amber"
+                            subText={`موزعة على ${warehouses.length} مستودعات`}
+                        />
+                        <KpiCard 
+                            title="العملاء المسجلون" 
+                            value={customers.length} 
+                            icon="fa-users" 
+                            color="sky"
+                            subText="حسابات عملاء نشطة"
+                        />
+                    </div>
+
+                    {/* القسم السفي التفصيلي */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        
+                        {/* جدول أحدث أذون البيع */}
+                        <div className="lg:col-span-2 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                    <i className="fa-solid fa-receipt text-indigo-500"></i>
+                                    <span>أحدث أوامر البيع</span>
+                                </h3>
+                                <button onClick={() => onNavigate('sales')} className="text-xs font-bold text-indigo-600 hover:underline">
+                                    عرض الكل ←
+                                </button>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-right text-xs">
+                                    <thead>
+                                        <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-bold">
+                                            <th className="pb-3">رقم الأمر</th>
+                                            <th className="pb-3">العميل</th>
+                                            <th className="pb-3">التاريخ</th>
+                                            <th className="pb-3">المبلغ الإجمالي</th>
+                                            <th className="pb-3">الحالة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {salesOrders.slice(0, 4).map(so => {
+                                            const cust = customers.find(c => c.id === so.customerId);
+                                            return (
+                                                <tr key={so.id} className="hover:bg-slate-50/80 transition">
+                                                    <td className="py-3 font-bold text-slate-700">{so.orderNo}</td>
+                                                    <td className="py-3 text-slate-600">{cust ? cust.name : 'عميل غير معروف'}</td>
+                                                    <td className="py-3 text-slate-500">{so.date}</td>
+                                                    <td className="py-3 font-bold text-slate-800">${so.total.toFixed(2)}</td>
+                                                    <td className="py-3">
+                                                        <StatusBadge status={so.status} />
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* تنبيهات النقص في المخزون */}
+                        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                        <i className="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                                        <span>تنبيهات نقص المخزون</span>
+                                    </h3>
+                                    <span className="text-xs font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
+                                        {lowStockCount}
+                                    </span>
+                                </div>
+                                <div className="space-y-3">
+                                    {products.filter(p => p.stock <= p.reorderLevel).map(p => (
+                                        <div key={p.id} className="flex justify-between items-center p-3 rounded-xl bg-amber-50/50 border border-amber-100">
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-800">{p.name}</p>
+                                                <p className="text-[10px] text-slate-500">الكود: {p.code} | السعة: {p.capacity || 'غير محدد'}</p>
+                                            </div>
+                                            <div className="text-left">
+                                                <span className="text-xs font-extrabold text-rose-600">{p.stock} قطعة</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {lowStockCount === 0 && (
+                                        <div className="text-center py-8 text-slate-400 text-xs">
+                                            <i className="fa-solid fa-circle-check text-emerald-500 text-2xl mb-2 block"></i>
+                                            جميع المنتجات متوفرة بكميات آمنة.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => onNavigate('products')} 
+                                className="w-full mt-4 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition"
+                            >
+                                إدارة كتالوج المنتجات
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        }
+
+        function ProductsView({ products, warehouses, onOpenAddModal }) {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [previewImage, setPreviewImage] = useState(null);
+
+            const filteredProducts = products.filter(p => {
+                const term = searchTerm.toLowerCase();
+                const nameMatch = p.name ? p.name.toLowerCase().includes(term) : false;
+                const codeMatch = p.code ? p.code.toLowerCase().includes(term) : false;
+                const caliberMatch = p.caliber ? p.caliber.toLowerCase().includes(term) : false;
+                const capacityMatch = p.capacity ? p.capacity.toLowerCase().includes(term) : false;
+                const colorMatch = p.color ? p.color.toLowerCase().includes(term) : false;
+                return nameMatch || codeMatch || caliberMatch || capacityMatch || colorMatch;
             });
 
-            div.innerHTML = `
-                <div class="flex justify-between items-center mb-3 border-b border-slate-200/60 pb-2">
-                    <span class="font-bold text-slate-800 text-sm">صلاة ${prayerNamesAr[key]}</span>
-                    <button onclick="togglePrayerMuteFromSettings('${key}')" id="setting-mute-btn-${key}" class="text-xs flex items-center gap-1 font-bold ${pSetting.muted ? 'text-slate-400' : 'text-emerald-600'}">
-                        <i data-lucide="${pSetting.muted ? 'bell-off' : 'bell'}" class="w-4 h-4"></i>
-                        <span>${pSetting.muted ? 'صامت' : 'مفعل'}</span>
-                    </button>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="block text-[10px] text-slate-500 mb-1 font-bold">صوت الأذان</label>
-                        <select onchange="updatePrayerVoice('${key}', this.value)" class="w-full bg-white text-slate-800 text-xs font-bold rounded-lg p-2 border border-slate-200 focus:outline-none">
-                            ${audioOptions}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-500 mb-1 font-bold">التنبيه المسبق</label>
-                        <select onchange="updatePrayerAlarm('${key}', this.value)" class="w-full bg-white text-slate-800 text-xs font-bold rounded-lg p-2 border border-slate-200 focus:outline-none">
-                            ${timeOptions}
-                        </select>
-                    </div>
-                </div>
-                <div class="text-left mt-2 pt-1">
-                    <button onclick="testAdhanVoiceSpecific('${key}')" class="text-[10px] text-emerald-700 bg-emerald-100 hover:bg-emerald-200 px-3 py-1 rounded-lg font-bold transition">تجربة الصوت</button>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-        lucide.createIcons();
-    }
-
-    function togglePrayerMuteFromSettings(key) {
-        prayerSettings[key].muted = !prayerSettings[key].muted;
-        savePrayerSettings();
-        initPrayerSettingsUI(); 
-        playBeep();
-    }
-
-    function togglePrayerMuteFromHome(key) {
-        prayerSettings[key].muted = !prayerSettings[key].muted;
-        savePrayerSettings();
-        initPrayerSettingsUI(); 
-        playBeep();
-    }
-
-    function updateMainPrayerListIcons() {
-        prayerKeysList.forEach(key => {
-            const btn = document.getElementById(`notif-${key}`);
-            if (btn) {
-                const isMuted = prayerSettings[key].muted;
-                if (isMuted) {
-                    btn.classList.replace('text-emerald-600', 'text-slate-300');
-                    btn.innerHTML = `<i data-lucide="bell-off" class="w-4 h-4"></i>`;
-                } else {
-                    btn.classList.replace('text-slate-300', 'text-emerald-600');
-                    btn.innerHTML = `<i data-lucide="bell" class="w-4 h-4"></i>`;
-                }
-            }
-        });
-        lucide.createIcons();
-    }
-
-    function updatePrayerVoice(key, voiceId) {
-        prayerSettings[key].voice = voiceId;
-        savePrayerSettings();
-        playBeep();
-    }
-
-    function updatePrayerAlarm(key, mins) {
-        prayerSettings[key].alarmBefore = parseInt(mins);
-        savePrayerSettings();
-        playBeep();
-    }
-
-    function playAudioBuffer() {
-    if (!audioContext || !audioBuffer) {
-        alert("الصوت لم يتم تحميله بعد");
-        return;
-    }
-
-    const source = audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(audioContext.destination);
-    source.start(0);
-
-    showCustomModal("✅ تم التشغيل", "الصوت يعمل بدون حظر 🚀");
-}
-
-async function testAdhanVoiceSpecific(key) {
-
-const voiceId = prayerSettings[key].voice;
-    const url = adhanAudioFiles[voiceId].url;
-
-    // ✅ وقف الصوت القديم
-    if (currentAdhanAudio) {
-        currentAdhanAudio.pause();
-        currentAdhanAudio.currentTime = 0;
-    }
-
-    // ✅ إنشاء صوت جديد
-    currentAdhanAudio = new Audio(url);
-
-    currentAdhanAudio.volume = 0.8;
-
-    currentAdhanAudio.play()
-        .then(() => {
-            isPlaying = true;
-
-            showCustomModal(
-                "✅ يعمل",
-                `تشغيل: ${adhanAudioFiles[voiceId].name}`
-            );
-        })
-        .catch(() => {
-            showCustomModal("❌ فشل", "اضغط على الصفحة أولًا");
-        });
-
-    // ✅ لما الصوت يخلص
-    currentAdhanAudio.onended = () => {
-        isPlaying = false;
-        currentAdhanAudio = null;
-    };
-}
-
-    
-
-
-    function populateCitiesDropdown() {
-        const citySelector = document.getElementById('city-selector');
-        citySelector.innerHTML = '<option value="gps">تحديد تلقائي (GPS)</option>';
-        const countryData = worldCountries[selectedCountry];
-        for (let cityKey in countryData.cities) {
-            citySelector.innerHTML += `<option value="${cityKey}">${countryData.cities[cityKey].name}</option>`;
-        }
-    }
-
-    function handleCountryChange() {
-        selectedCountry = document.getElementById('country-selector').value;
-        localStorage.setItem('selected_country', selectedCountry);
-        populateCitiesDropdown();
-        selectedCity = Object.keys(worldCountries[selectedCountry].cities)[0];
-        document.getElementById('city-selector').value = selectedCity;
-        localStorage.setItem('selected_city', selectedCity);
-        applyLocationAndCalculate();
-        playBeep();
-    }
-
-    function handleCityChange() {
-        selectedCity = document.getElementById('city-selector').value;
-        localStorage.setItem('selected_city', selectedCity);
-        applyLocationAndCalculate();
-        playBeep();
-    }
-
-    function toggleDST() {
-        dstActive = !dstActive;
-        localStorage.setItem('dst_active', dstActive);
-        updateDST_UI();
-        calculatePrayerTimes();
-        playBeep();
-    }
-
-    function updateDST_UI() {
-        const statusText = document.getElementById('dst-status-text');
-        const toggleBg = document.getElementById('dst-toggle-bg');
-        const toggleCircle = document.getElementById('dst-toggle-circle');
-
-        if (dstActive) {
-            statusText.textContent = 'توقيت صيفي نشط (+3)';
-            toggleBg.classList.replace('bg-slate-300', 'bg-amber-500');
-            toggleCircle.classList.replace('translate-x-0', 'translate-x-4');
-        } else {
-            statusText.textContent = 'توقيت شتوي نشط (+2)';
-            toggleBg.classList.replace('bg-amber-500', 'bg-slate-300');
-            toggleCircle.classList.replace('translate-x-4', 'translate-x-0');
-        }
-    }
-
-    function applyLocationAndCalculate() {
-        const locText = document.getElementById('current-location-text');
-        if (selectedCity === 'gps') {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    userLatitude = pos.coords.latitude; userLongitude = pos.coords.longitude;
-                    locText.textContent = `موقعك التلقائي (GPS)`;
-                    calculateQiblaAngleDegrees(userLatitude, userLongitude);
-                    calculatePrayerTimes();
-                }, () => fallbackToDefaultCity());
-            } else fallbackToDefaultCity();
-        } else {
-            const cityData = worldCountries[selectedCountry].cities[selectedCity];
-            userLatitude = cityData.lat; userLongitude = cityData.lon;
-            locText.textContent = `مواقيت: ${cityData.name}`;
-            calculateQiblaAngleDegrees(userLatitude, userLongitude);
-            calculatePrayerTimes();
-        }
-    }
-
-    function fallbackToDefaultCity() {
-        selectedCity = Object.keys(worldCountries[selectedCountry].cities)[0];
-        document.getElementById('city-selector').value = selectedCity;
-        applyLocationAndCalculate();
-    }
-
-    function forceGPSRefresh() {
-        document.getElementById('city-selector').value = 'gps';
-        handleCityChange();
-    }
-
-    function calculateQiblaAngleDegrees(lat, lon) {
-        const makkahLat = 21.4225 * Math.PI / 180, makkahLon = 39.8262 * Math.PI / 180;
-        const userLatRad = lat * Math.PI / 180, userLonRad = lon * Math.PI / 180;
-        const deltaLon = makkahLon - userLonRad;
-        const y = Math.sin(deltaLon);
-        const x = Math.cos(userLatRad) * Math.tan(makkahLat) - Math.sin(userLatRad) * Math.cos(deltaLon);
-        calculatedQiblaAngle = Math.round((Math.atan2(y, x) * 180 / Math.PI + 360) % 360);
-        document.getElementById('qibla-angle-display').textContent = `${calculatedQiblaAngle}° من الشمال`;
-        const target = document.getElementById('makkah-target-indicator');
-        if (target) target.style.transform = `rotate(${calculatedQiblaAngle}deg) translateY(-85px) rotate(${-calculatedQiblaAngle}deg)`;
-    }
-
-    function calculatePrayerTimes() {
-        const now = new Date();
-        function getJD(y, m, d) { if(m<=2){y-=1;m+=12;} let A=Math.floor(y/100), B=2-A+Math.floor(A/4); return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5; }
-        let D = getJD(now.getFullYear(), now.getMonth()+1, now.getDate()) - 2451545.0;
-        
-        let g = (357.529 + 0.98560028 * D) % 360; 
-        let q = (280.459 + 0.98564736 * D) % 360; 
-        let L = (q + 1.915 * Math.sin(g * Math.PI / 180) + 0.020 * Math.sin(2 * g * Math.PI / 180)) % 360; 
-        let e = (23.439 - 0.00000036 * D) % 360; 
-
-        let RA = Math.atan2(Math.cos(e * Math.PI / 180) * Math.sin(L * Math.PI / 180), Math.cos(L * Math.PI / 180)) * 180 / Math.PI;
-        RA = (RA + 360) % 360;
-        let declRad = Math.asin(Math.sin(e * Math.PI / 180) * Math.sin(L * Math.PI / 180)); 
-
-        let diff = (q % 360) - RA;
-        if (diff < -180) diff += 360; else if (diff > 180) diff -= 360;
-        
-        let dhuhrTimeDecimal = 12 - (diff / 15) + ((dstActive ? 3 : 2) - userLongitude / 15);
-        let latRad = userLatitude * Math.PI / 180;
-
-        function HA(angle) {
-            let cosH = (Math.sin(angle * Math.PI / 180) - Math.sin(latRad) * Math.sin(declRad)) / (Math.cos(latRad) * Math.cos(declRad));
-            if (cosH > 1) return 0; if (cosH < -1) return 180; return Math.acos(cosH) * 180 / Math.PI;
-        }
-
-        const method = worldCountries[selectedCountry].method;
-        let fajrA = method === "Makkah" ? -18.5 : (method === "Gulf" ? -18.2 : -19.5);
-        let ishaA = method === "Gulf" ? -18.2 : -17.5;
-
-        let H_fajr = HA(fajrA)/15, H_sun = HA(-0.833)/15, H_isha = HA(ishaA)/15;
-        let asrA = Math.atan(1 / (1 + Math.tan(Math.abs(latRad - declRad)))) * 180 / Math.PI;
-        
-        let p = {
-            fajr: formatDecimalTime(dhuhrTimeDecimal - H_fajr),
-            sunrise: formatDecimalTime(dhuhrTimeDecimal - H_sun),
-            dhuhr: formatDecimalTime(dhuhrTimeDecimal),
-            asr: formatDecimalTime(dhuhrTimeDecimal + (HA(asrA)/15)),
-            maghrib: formatDecimalTime(dhuhrTimeDecimal + H_sun),
-            isha: formatDecimalTime(method === "Makkah" ? (dhuhrTimeDecimal + H_sun + 1.5) : (dhuhrTimeDecimal + H_isha))
-        };
-        
-        document.getElementById('time-fajr').textContent = formatTimeTo12Hour(p.fajr);
-        document.getElementById('time-sunrise').textContent = formatTimeTo12Hour(p.sunrise);
-        document.getElementById('time-dhuhr').textContent = formatTimeTo12Hour(p.dhuhr);
-        document.getElementById('time-asr').textContent = formatTimeTo12Hour(p.asr);
-        document.getElementById('time-maghrib').textContent = formatTimeTo12Hour(p.maghrib);
-        document.getElementById('time-isha').textContent = formatTimeTo12Hour(p.isha);
-        
-        window.calculatedPrayers = p;
-        updateMainPrayerListIcons();
-    }
-
-    function formatDecimalTime(decimal) {
-        let h = Math.floor(decimal), m = Math.round((decimal - h) * 60);
-        if (m === 60) { h++; m = 0; }
-        if (h >= 24) h -= 24; else if (h < 0) h += 24;
-        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    }
-
-    function formatTimeTo12Hour(time24) {
-        let [h, m] = time24.split(':');
-        h = parseInt(h);
-        const ampm = h >= 12 ? 'م' : 'ص';
-        return `${String(h % 12 || 12).padStart(2,'0')}:${m} ${ampm}`;
-    }
-
-    function runAppClock() {
-        if (!window.calculatedPrayers) return;
-        const now = new Date();
-        let nextK = 'fajr', minDiff = Infinity, tStr = '';
-
-        for (let k in prayerNamesAr) {
-            let [h, m] = window.calculatedPrayers[k].split(':');
-            let pd = new Date(); pd.setHours(h, m, 0);
-            let diff = pd.getTime() - now.getTime();
-            if (diff < 0) { pd.setDate(pd.getDate() + 1); diff = pd.getTime() - now.getTime(); }
-            if (diff < minDiff) { minDiff = diff; nextK = k; tStr = window.calculatedPrayers[k]; }
-        }
-
-        // تحديث الثواني بشكل دوري وبكفاءة
-        document.getElementById('next-prayer-countdown').textContent = `${String(Math.floor(minDiff/3600000)).padStart(2,'0')}:${String(Math.floor((minDiff%3600000)/60000)).padStart(2,'0')}:${String(Math.floor((minDiff%60000)/1000)).padStart(2,'0')}`;
-
-        // تحديث حالة الأيقونات والألوان فقط في حال تغير الفرض القادم لتوفير موارد الجهاز
-        if (lastNextK !== nextK) {
-            lastNextK = nextK;
-            
-            document.getElementById('next-prayer-name').innerHTML = `<i data-lucide="bell" class="w-6 h-6 text-amber-500 animate-bounce"></i><span>${prayerNamesAr[nextK]} (${formatTimeTo12Hour(tStr)})</span>`;
-
-            const pSet = prayerSettings[nextK];
-            const statusHTML = pSet.muted 
-                ? `<i data-lucide="volume-x" class="w-4 h-4 text-slate-400"></i><span>الأذان صامت لل${prayerNamesAr[nextK]}</span>` 
-                : `<i data-lucide="volume-2" class="w-4 h-4 text-emerald-600"></i><span>أذان بصوت ${adhanAudioFiles[pSet.voice].name}</span>`;
-            document.getElementById('next-prayer-status-text').innerHTML = statusHTML;
-
-            for (let k in prayerNamesAr) {
-                const row = document.getElementById(`prayer-row-${k}`);
-                if(row) {
-                    row.classList.remove('bg-emerald-50/70', 'border-emerald-200/60', 'scale-[1.01]');
-                    let i = row.querySelector('.prayer-icon');
-                    if(i) i.classList.replace('bg-emerald-600', 'bg-slate-100'), i.classList.replace('text-white', 'text-slate-600');
-                }
-            }
-            let nxR = document.getElementById(`prayer-row-${nextK}`);
-            if(nxR){
-                nxR.classList.add('bg-emerald-50/70', 'border-emerald-200/60', 'scale-[1.01]');
-                let ni = nxR.querySelector('.prayer-icon');
-                if(ni) ni.classList.replace('bg-slate-100', 'bg-emerald-600'), ni.classList.replace('text-slate-600', 'text-white');
-            }
-            
-            lucide.createIcons();
-        }
-        
-        checkAdhanAlerts(now, nextK, minDiff);
-    }
-
-    let lAlert = '', lPre = '';
-    function checkAdhanAlerts(now, nk, diff) {
-        let trigger = prayerSettings[nk].alarmBefore * 60000;
-        if (diff <= trigger && diff > trigger-5000 && lPre !== nk) {
-            lPre = nk; playBeep(); showCustomModal('تنبيه مسبق', `متبقي ${prayerSettings[nk].alarmBefore} دقيقة على ${prayerNamesAr[nk]}.`);
-        }
-        if (diff <= 2000 && lAlert !== nk) {
-            lAlert = nk;
-            if(!prayerSettings[nk].muted) {
-                let ap = document.getElementById('adhan-player');
-                ap.src = adhanAudioFiles[prayerSettings[nk].voice].url;
-                ap.currentTime = 0; ap.play().catch(()=>{});
-            }
-            showCustomModal('حان موعد الأذان', `حان الآن وقت صلاة ${prayerNamesAr[nk]}.`);
-        }
-    }
-
-    function initAthkarCategoriesUI() {
-        const container = document.getElementById('athkar-categories-container');
-        container.innerHTML = '';
-        athkarCategories.forEach((cat, idx) => {
-            const btn = document.createElement('button');
-            btn.id = `athkar-btn-${cat.id}`;
-            btn.onclick = () => filterAthkar(cat.id);
-            btn.className = idx === 0 
-                ? "bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap shadow-sm"
-                : "bg-slate-100 text-slate-600 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap hover:bg-slate-200 transition";
-            btn.textContent = cat.name;
-            container.appendChild(btn);
-        });
-        filterAthkar('morning'); 
-    }
-
-    function filterAthkar(type) {
-        const container = document.getElementById('athkar-items-container');
-        container.innerHTML = '';
-
-        athkarCategories.forEach(cat => {
-            const btn = document.getElementById(`athkar-btn-${cat.id}`);
-            if (btn) {
-                btn.className = cat.id === type 
-                    ? "bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap shadow-sm"
-                    : "bg-slate-100 text-slate-600 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap hover:bg-slate-200 transition";
-            }
-        });
-
-        athkarData[type].forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = "p-4 bg-slate-50 border border-slate-100 rounded-2xl transition space-y-3 relative";
-            div.innerHTML = `
-                <p class="font-amiri text-base text-slate-900 text-justify leading-relaxed">${item.text}</p>
-                <div id="ai-explain-${type}-${index}" class="hidden mt-3 p-3 bg-emerald-100/50 rounded-xl text-xs text-emerald-900 leading-relaxed border border-emerald-200/50 shadow-inner font-tajawal"></div>
-                <div class="flex justify-between items-center pt-2 border-t border-slate-200/50 mt-1">
-                <button id="ai-btn-${type}-${index}" onclick="explainThikr('${type}', ${index})" class="text-emerald-700 hover:text-emerald-800 flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition active:scale-95">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> <span>شرح الذكر ✨</span>
-                </button>
-                <div class="flex items-center gap-2">
-                    <span class="text-[10px] text-slate-500 font-bold">التكرار: ${item.count}</span>
-                    <button onclick="incrementAthkarCount('${type}', ${index}, this)" class="bg-emerald-50 text-emerald-800 font-bold px-4 py-1.5 rounded-full text-xs flex items-center gap-1 hover:bg-emerald-100 transition shadow-sm">
-                        <span id="counter-current-${type}-${index}">${item.current}</span> / <span>${item.count}</span>
-                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                    </button>
-                </div>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-        lucide.createIcons();
-    }
-
-    function incrementAthkarCount(type, index, btnElement) {
-        const item = athkarData[type][index];
-        if (item.current < item.count) {
-            item.current += 1;
-            document.getElementById(`counter-current-${type}-${index}`).textContent = item.current;
-            playBeep(); 
-            if (item.current === item.count) {
-                btnElement.className = "bg-slate-200 text-slate-400 font-bold px-4 py-1.5 rounded-full text-xs flex items-center gap-1 cursor-not-allowed";
-                btnElement.innerHTML = `<span>مكتمل</span> <i data-lucide="check" class="w-3.5 h-3.5"></i>`;
-                lucide.createIcons();
-            }
-        }
-    }
-
-    function renderDuas(category = 'jawami') {
-        const container = document.getElementById('duas-list-container');
-        container.innerHTML = '';
-        ['jawami', 'quranic', 'protection', 'deceased', 'ai'].forEach(t => {
-            const btn = document.getElementById(`dua-btn-${t}`);
-            if (btn) {
-                if (t === 'ai') {
-                     btn.className = t === category ? "bg-gradient-to-r from-amber-400 to-amber-500 text-amber-950 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap shadow-md flex items-center gap-1 transition" : "bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap hover:scale-105 transition shadow-sm flex items-center gap-1";
-                } else {
-                     btn.className = t === category ? "bg-emerald-800 text-white text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap shadow-sm" : "bg-slate-100 text-slate-600 text-xs font-bold px-4 py-2.5 rounded-full whitespace-nowrap hover:bg-slate-200 transition";
-                }
-            }
-        });
-
-        if (category === 'ai') {
-            container.innerHTML = `
-                <div class="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-3xl relative overflow-hidden shadow-sm">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-200/20 rounded-full -mr-10 -mt-10 blur-2xl"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center gap-2 mb-3 text-emerald-800">
-                            <i data-lucide="bot" class="w-5 h-5"></i>
-                            <h3 class="font-bold text-sm">المساعد الدعوي الذكي</h3>
+            return (
+                <div className="space-y-4 max-w-7xl mx-auto">
+                    {/* شريط البحث والإضافة */}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <div className="relative flex-1 w-full sm:max-w-md">
+                            <i className="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
+                            <input 
+                                type="text" 
+                                placeholder="بحث باسم المنتج، الكود، العيار، السعة، أو اللون..." 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pr-9 pl-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 transition"
+                            />
                         </div>
-                        <p class="text-[11px] text-emerald-600 mb-4 font-medium leading-relaxed">صف ما تشعر به، أو ما تمر به من ظروف، وسيقوم المساعد باقتراح أدعية مخصصة ومناسبة لك بناءً على القرآن والسنة.</p>
-                        <textarea id="ai-dua-input" class="w-full p-3 rounded-2xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs mb-3 bg-white/80 backdrop-blur-sm" rows="3" placeholder="مثال: أشعر بضيق في الرزق وقلق من المستقبل..."></textarea>
-                        <button id="ai-dua-btn" onclick="generateAIDua()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-2xl transition flex items-center justify-center gap-2 text-xs shadow-md active:scale-95">
-                            <i data-lucide="sparkles" class="w-4 h-4"></i> <span>توليد دعاء مخصص</span>
+                        <button 
+                            onClick={onOpenAddModal}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md shadow-indigo-100 flex items-center gap-2 transition w-full sm:w-auto justify-center"
+                        >
+                            <i className="fa-solid fa-plus"></i>
+                            <span>إضافة منتج جديد</span>
                         </button>
-                        <div id="ai-dua-result" class="mt-4 p-4 bg-white/90 backdrop-blur-sm rounded-2xl border border-emerald-100 text-sm text-slate-800 leading-relaxed hidden shadow-sm font-amiri"></div>
+                    </div>
+
+                    {/* نافذة معاينة الصور عند النقر */}
+                    {previewImage && (
+                        <div 
+                            className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4"
+                            onClick={() => setPreviewImage(null)}
+                        >
+                            <div className="bg-white p-3 rounded-2xl max-w-lg w-full relative overflow-hidden animate-in fade-in zoom-in-95">
+                                <button 
+                                    onClick={() => setPreviewImage(null)}
+                                    className="absolute top-3 left-3 bg-slate-800/70 hover:bg-slate-900 text-white rounded-full w-8 h-8 flex items-center justify-center z-10"
+                                >
+                                    <i className="fa-solid fa-xmark"></i>
+                                </button>
+                                <img 
+                                    src={previewImage.url} 
+                                    alt={previewImage.title} 
+                                    className="w-full h-80 object-cover rounded-xl mb-3" 
+                                    onError={(e) => { e.target.src = 'https://placehold.co/600x600/cbd5e1/475569?text=صورة+غير+متوفرة'; }}
+                                />
+                                <div className="text-center font-bold text-sm text-slate-800">
+                                    {previewImage.title}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* جدول عرض المنتجات وتفاصيل العبوات والملصقات */}
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-right text-xs">
+                                <thead>
+                                    <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-bold">
+                                        <th className="p-4">المنتج والعبوة</th>
+                                        <th className="p-4 text-center">صورة العبوة</th>
+                                        <th className="p-4 text-center">صورة الملصق</th>
+                                        <th className="p-4">الكود</th>
+                                        <th className="p-4">العيار</th>
+                                        <th className="p-4">السعة</th>
+                                        <th className="p-4">اللون</th>
+                                        <th className="p-4">المستودع</th>
+                                        <th className="p-4">سعر البيع</th>
+                                        <th className="p-4">الكمية</th>
+                                        <th className="p-4">الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {filteredProducts.map(product => {
+                                        const wh = warehouses.find(w => w.id === product.warehouseId);
+                                        const isLowStock = product.stock <= product.reorderLevel;
+
+                                        return (
+                                            <tr key={product.id} className="hover:bg-slate-50/80 transition">
+                                                <td className="p-4">
+                                                    <div className="font-bold text-slate-800 text-sm">{product.name}</div>
+                                                </td>
+                                                {/* صورة العبوة */}
+                                                <td className="p-4 text-center">
+                                                    <div 
+                                                        onClick={() => setPreviewImage({ url: product.packageImage || 'https://placehold.co/400x400?text=صورة+العبوة', title: `صورة العبوة - ${product.name}` })}
+                                                        className="w-12 h-12 rounded-xl border border-slate-200 bg-slate-100 mx-auto overflow-hidden cursor-pointer hover:opacity-80 hover:scale-105 transition shadow-sm"
+                                                    >
+                                                        <img 
+                                                            src={product.packageImage || 'https://placehold.co/400x400?text=عبوة'} 
+                                                            alt="صورة العبوة" 
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => { e.target.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=عبوة'; }}
+                                                        />
+                                                    </div>
+                                                </td>
+                                                {/* صورة الملصق */}
+                                                <td className="p-4 text-center">
+                                                    <div 
+                                                        onClick={() => setPreviewImage({ url: product.labelImage || 'https://placehold.co/400x400?text=صورة+الملصق', title: `صورة الملصق - ${product.name}` })}
+                                                        className="w-12 h-12 rounded-xl border border-slate-200 bg-slate-100 mx-auto overflow-hidden cursor-pointer hover:opacity-80 hover:scale-105 transition shadow-sm"
+                                                    >
+                                                        <img 
+                                                            src={product.labelImage || 'https://placehold.co/400x400?text=ملصق'} 
+                                                            alt="صورة الملصق" 
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => { e.target.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=ملصق'; }}
+                                                        />
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 font-mono font-bold text-slate-700">{product.code}</td>
+                                                <td className="p-4">
+                                                    <span className="bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-lg text-[11px] font-bold inline-block">
+                                                        {product.caliber || 'غير محدد'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className="bg-sky-50 text-sky-800 border border-sky-200 px-2.5 py-1 rounded-lg text-[11px] font-bold inline-block">
+                                                        {product.capacity || 'غير محدد'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className="bg-fuchsia-50 text-fuchsia-800 border border-fuchsia-200 px-2.5 py-1 rounded-lg text-[11px] font-bold inline-block">
+                                                        {product.color || 'غير محدد'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-slate-600">
+                                                    <i className="fa-solid fa-warehouse text-slate-400 ml-1.5"></i>
+                                                    {wh ? wh.name : 'غير محدد'}
+                                                </td>
+                                                <td className="p-4 font-bold text-slate-800">${product.price.toFixed(2)}</td>
+                                                <td className="p-4">
+                                                    <span className={`font-extrabold ${isLowStock ? 'text-rose-600' : 'text-slate-700'}`}>
+                                                        {product.stock} قطعة
+                                                    </span>
+                                                </td>
+                                                <td className="p-4">
+                                                    {isLowStock ? (
+                                                        <span className="bg-rose-100 text-rose-700 font-bold px-2.5 py-1 rounded-full text-[10px] inline-flex items-center gap-1">
+                                                            <i className="fa-solid fa-circle-exclamation"></i>
+                                                            <span>إعادة طلب</span>
+                                                        </span>
+                                                    ) : (
+                                                        <span className="bg-emerald-100 text-emerald-700 font-bold px-2.5 py-1 rounded-full text-[10px]">
+                                                            متوفر
+                                                        </span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            `;
-            lucide.createIcons();
-            return;
+            );
         }
 
-        dorarDuasData[category].forEach(dua => {
-            const div = document.createElement('div');
-            div.className = "p-4 bg-amber-50/50 border border-amber-100/50 rounded-2xl relative overflow-hidden transition-all hover:shadow-md";
-            div.innerHTML = `
-                <div class="absolute -right-4 -top-4 w-16 h-16 bg-amber-100/50 rounded-full z-0"></div>
-                <p class="font-amiri text-base text-slate-800 text-justify leading-relaxed relative z-10">${dua.text}</p>
-                <div class="mt-3 flex justify-between items-center relative z-10 border-t border-amber-100/50 pt-2">
-                    <span class="text-[9px] text-amber-800 bg-amber-100/40 px-2.5 py-0.5 rounded font-bold">${dua.source}</span>
-                    <button onclick="copyToClipboard(this, '${dua.text}')" class="text-amber-600 hover:bg-amber-100 p-1.5 rounded-lg transition" title="نسخ الدعاء">
-                        <i data-lucide="copy" class="w-4 h-4"></i>
+        function RepositoryView({ warehouses, products, onOpenTransferModal }) {
+            return (
+                <div className="space-y-6 max-w-7xl mx-auto">
+                    <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-800">شبكة المستودعات اللوجستية</h3>
+                            <p className="text-xs text-slate-500">متابعة مواقع التخزين ومناقلة المنتجات بين الفروع</p>
+                        </div>
+                        <button 
+                            onClick={onOpenTransferModal}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-indigo-100 flex items-center gap-2 transition"
+                        >
+                            <i className="fa-solid fa-arrow-right-arrow-left"></i>
+                            <span>مناقلة المخزون</span>
+                        </button>
+                    </div>
+
+                    {/* شبكة المستودعات */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        {warehouses.map(wh => {
+                            const whProducts = products.filter(p => p.warehouseId === wh.id);
+                            const totalItemsCount = whProducts.reduce((acc, p) => acc + p.stock, 0);
+
+                            return (
+                                <div key={wh.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition">
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+                                            <i className="fa-solid fa-warehouse text-lg"></i>
+                                        </div>
+                                        <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                                            معرف: {wh.id}
+                                        </span>
+                                    </div>
+
+                                    <h4 className="font-bold text-slate-800 text-sm mb-1">{wh.name}</h4>
+                                    <p className="text-xs text-slate-500 mb-4 flex items-center gap-1">
+                                        <i className="fa-solid fa-location-dot text-slate-400"></i>
+                                        <span>{wh.location}</span>
+                                    </p>
+
+                                    <div className="border-t border-slate-100 pt-3 space-y-2 text-xs">
+                                        <div className="flex justify-between text-slate-600">
+                                            <span>المدير المسؤول:</span>
+                                            <span className="font-bold text-slate-800">{wh.manager}</span>
+                                        </div>
+                                        <div className="flex justify-between text-slate-600">
+                                            <span>أصناف المنتجات:</span>
+                                            <span className="font-bold text-indigo-600">{whProducts.length} صنف</span>
+                                        </div>
+                                        <div className="flex justify-between text-slate-600">
+                                            <span>إجمالي القطع المخزنة:</span>
+                                            <span className="font-bold text-slate-800">{totalItemsCount} قطعة</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        }
+
+        function SalesView({ salesOrders, customers, products, onOpenCreateModal }) {
+            return (
+                <div className="space-y-4 max-w-7xl mx-auto">
+                    <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-800">سجل أذون وأوامر البيع</h3>
+                            <p className="text-xs text-slate-500">متابعة الفواتير الصادرة وتدفق المبيعات</p>
+                        </div>
+                        <button 
+                            onClick={onOpenCreateModal}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-indigo-100 flex items-center gap-2 transition"
+                        >
+                            <i className="fa-solid fa-plus"></i>
+                            <span>أمر بيع جديد</span>
+                        </button>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <table className="w-full text-right text-xs">
+                            <thead>
+                                <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-bold">
+                                    <th className="p-4">مرجع الأمر</th>
+                                    <th className="p-4">اسم العميل</th>
+                                    <th className="p-4">تاريخ الطلب</th>
+                                    <th className="p-4">عدد الأصناف</th>
+                                    <th className="p-4">الإجمالي الكلي</th>
+                                    <th className="p-4">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {salesOrders.map(so => {
+                                    const customer = customers.find(c => c.id === so.customerId);
+                                    return (
+                                        <tr key={so.id} className="hover:bg-slate-50/80 transition">
+                                            <td className="p-4 font-bold text-indigo-600">{so.orderNo}</td>
+                                            <td className="p-4 font-bold text-slate-800">{customer ? customer.name : 'عميل عام'}</td>
+                                            <td className="p-4 text-slate-500">{so.date}</td>
+                                            <td className="p-4 text-slate-600">{so.items.length} عنصر</td>
+                                            <td className="p-4 font-bold text-slate-800">${so.total.toFixed(2)}</td>
+                                            <td className="p-4">
+                                                <StatusBadge status={so.status} />
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        }
+
+        function PurchaseView({ purchaseOrders, warehouses, products, onOpenCreateModal, onReceivePO }) {
+            return (
+                <div className="space-y-4 max-w-7xl mx-auto">
+                    <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-800">إدارة مشتريات الموردين</h3>
+                            <p className="text-xs text-slate-500">إصدار طلبات التوريد وإيداع الشحنات بالحسابات</p>
+                        </div>
+                        <button 
+                            onClick={onOpenCreateModal}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-indigo-100 flex items-center gap-2 transition"
+                        >
+                            <i className="fa-solid fa-plus"></i>
+                            <span>إصدار أمر شراء</span>
+                        </button>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                        <table className="w-full text-right text-xs">
+                            <thead>
+                                <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-bold">
+                                    <th className="p-4">رقم PO</th>
+                                    <th className="p-4">المورد / الجهة</th>
+                                    <th className="p-4">المستودع المستلم</th>
+                                    <th className="p-4">التاريخ</th>
+                                    <th className="p-4">إجمالي التكلفة</th>
+                                    <th className="p-4">الحالة</th>
+                                    <th className="p-4 text-left">الإجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {purchaseOrders.map(po => {
+                                    const wh = warehouses.find(w => w.id === po.warehouseId);
+                                    return (
+                                        <tr key={po.id} className="hover:bg-slate-50/80 transition">
+                                            <td className="p-4 font-bold text-slate-700">{po.poNo}</td>
+                                            <td className="p-4 font-bold text-slate-800">{po.supplier}</td>
+                                            <td className="p-4 text-slate-600">{wh ? wh.name : 'الرئيسي'}</td>
+                                            <td className="p-4 text-slate-500">{po.date}</td>
+                                            <td className="p-4 font-bold text-slate-800">${po.total.toFixed(2)}</td>
+                                            <td className="p-4">
+                                                <StatusBadge status={po.status} />
+                                            </td>
+                                            <td className="p-4 text-left">
+                                                {po.status === 'معلق' && (
+                                                    <button 
+                                                        onClick={() => onReceivePO(po.id)}
+                                                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold px-3 py-1.5 rounded-lg border border-emerald-200 transition"
+                                                    >
+                                                        <i className="fa-solid fa-box-open ml-1"></i>
+                                                        استلام البضاعة
+                                                    </button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+        }
+
+        function CustomersView({ customers, salesOrders, onOpenAddModal }) {
+            return (
+                <div className="space-y-4 max-w-7xl mx-auto">
+                    <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-800">دليل العملاء والحسابات (CRM)</h3>
+                            <p className="text-xs text-slate-500">سجل التعاملات وإجمالي مشتريات العملاء</p>
+                        </div>
+                        <button 
+                            onClick={onOpenAddModal}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-md shadow-indigo-100 flex items-center gap-2 transition"
+                        >
+                            <i className="fa-solid fa-user-plus"></i>
+                            <span>تسجيل عميل جديد</span>
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {customers.map(cust => {
+                            const custOrders = salesOrders.filter(so => so.customerId === cust.id);
+                            const totalSpent = custOrders.reduce((acc, so) => acc + so.total, 0);
+
+                            return (
+                                <div key={cust.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 text-sm">
+                                                {cust.name.substring(0, 2)}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-800 text-sm">{cust.name}</h4>
+                                                <p className="text-xs text-slate-500">{cust.email}</p>
+                                            </div>
+                                        </div>
+                                        <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full text-[10px]">
+                                            {cust.status}
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl text-xs">
+                                        <div>
+                                            <span className="text-slate-400 block text-[10px] mb-0.5">رقم الهاتف</span>
+                                            <span className="font-semibold text-slate-700">{cust.phone}</span>
+                                        </div>
+                                        <div>
+                                            <span className="text-slate-400 block text-[10px] mb-0.5">إجمالي الطلبات</span>
+                                            <span className="font-bold text-indigo-600">{custOrders.length} طلبات</span>
+                                        </div>
+                                        <div className="col-span-2 border-t border-slate-200/60 pt-2 mt-1">
+                                            <span className="text-slate-400 block text-[10px] mb-0.5">إجمالي القيمة الشرائية</span>
+                                            <span className="font-extrabold text-slate-900 text-sm">${totalSpent.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        }
+
+        
+        function ProductForm({ warehouses, onSubmit }) {
+            const [form, setForm] = useState({
+                code: 'PRD-' + Math.floor(1000 + Math.random() * 9000),
+                name: '',
+                caliber: 'عيار 21',
+                capacity: '500 مل',
+                color: '',
+                price: '',
+                cost: '',
+                stock: '',
+                reorderLevel: '10',
+                warehouseId: warehouses[0]?.id || '',
+                packageImage: '',
+                labelImage: ''
+            });
+
+            // دالة معالجة رفع الصور من الجهاز
+            const handleImageUpload = (e, fieldName) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setForm(prev => ({ ...prev, [fieldName]: reader.result }));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            return (
+                <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="space-y-4 text-xs">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">كود المنتج</label>
+                            <input 
+                                type="text" 
+                                required 
+                                value={form.code} 
+                                onChange={e => setForm({...form, code: e.target.value})} 
+                                placeholder="مثال: PRD-9001"
+                                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-indigo-500 font-mono font-bold" 
+                            />
+                        </div>
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">اسم المنتج / العبوة</label>
+                            <input 
+                                type="text" 
+                                required 
+                                value={form.name} 
+                                onChange={e => setForm({...form, name: e.target.value})} 
+                                placeholder="مثال: قارورة فاخرة زجاجية" 
+                                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-indigo-500" 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">العيار</label>
+                            <input 
+                                type="text" 
+                                required
+                                value={form.caliber} 
+                                onChange={e => setForm({...form, caliber: e.target.value})} 
+                                placeholder="مثال: عيار 21، ممتاز A+، نقي"
+                                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">السعة</label>
+                            <input 
+                                type="text" 
+                                required
+                                value={form.capacity} 
+                                onChange={e => setForm({...form, capacity: e.target.value})} 
+                                placeholder="مثال: 500 مل، 1 لتر، 250 جرام"
+                                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">اللون</label>
+                            <input 
+                                type="text" 
+                                required
+                                value={form.color} 
+                                onChange={e => setForm({...form, color: e.target.value})} 
+                                placeholder="مثال: شفاف، أبيض، أحمر"
+                                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:border-indigo-500"
+                            />
+                        </div>
+                    </div>
+
+                    {/* اختيار الصور محليا من الجهاز */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">صورة العبوة</label>
+                            <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={e => handleImageUpload(e, 'packageImage')} 
+                                className="w-full p-1.5 bg-white border border-slate-200 rounded-xl text-[11px] focus:outline-none focus:border-indigo-500 file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                            />
+                            {form.packageImage && (
+                                <div className="mt-2 h-24 w-24 rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
+                                    <img src={form.packageImage} alt="معاينة العبوة" className="w-full h-full object-cover" onError={(e) => e.target.style.display='none'} />
+                                </div>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">صورة الملصق</label>
+                            <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={e => handleImageUpload(e, 'labelImage')} 
+                                className="w-full p-1.5 bg-white border border-slate-200 rounded-xl text-[11px] focus:outline-none focus:border-indigo-500 file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                            />
+                            {form.labelImage && (
+                                <div className="mt-2 h-24 w-24 rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
+                                    <img src={form.labelImage} alt="معاينة الملصق" className="w-full h-full object-cover" onError={(e) => e.target.style.display='none'} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">تكلفة الشراء ($)</label>
+                            <input type="number" step="0.01" required value={form.cost} onChange={e => setForm({...form, cost: e.target.value})} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white" />
+                        </div>
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">سعر البيع ($)</label>
+                            <input type="number" step="0.01" required value={form.price} onChange={e => setForm({...form, price: e.target.value})} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">الكمية الأولية</label>
+                            <input type="number" required value={form.stock} onChange={e => setForm({...form, stock: e.target.value})} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white" />
+                        </div>
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">حد التنبيه</label>
+                            <input type="number" required value={form.reorderLevel} onChange={e => setForm({...form, reorderLevel: e.target.value})} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white" />
+                        </div>
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">المستودع</label>
+                            <select value={form.warehouseId} onChange={e => setForm({...form, warehouseId: e.target.value})} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold focus:bg-white">
+                                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl mt-4 shadow-md shadow-indigo-100 transition">
+                        حفظ المنتج في الكتالوج
+                    </button>
+                </form>
+            );
+        }
+
+        // نموذج إضافة عميل
+        function CustomerForm({ onSubmit }) {
+            const [form, setForm] = useState({ name: '', email: '', phone: '', address: '' });
+
+            return (
+                <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="space-y-3 text-xs">
+                    <div>
+                        <label className="block font-bold text-slate-700 mb-1">الاسم الكامل / اسم الشركة</label>
+                        <input type="text" required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+                    </div>
+                    <div>
+                        <label className="block font-bold text-slate-700 mb-1">البريد الإلكتروني</label>
+                        <input type="email" required value={form.email} onChange={e => setForm({...form, email: e.target.value})} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+                    </div>
+                    <div>
+                        <label className="block font-bold text-slate-700 mb-1">رقم التواصل</label>
+                        <input type="text" required value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+                    </div>
+                    <div>
+                        <label className="block font-bold text-slate-700 mb-1">العنوان</label>
+                        <input type="text" value={form.address} onChange={e => setForm({...form, address: e.target.value})} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+                    </div>
+                    <button type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl mt-4 shadow-md shadow-indigo-100 transition">
+                        حفظ بيانات العميل
+                    </button>
+                </form>
+            );
+        }
+
+        // نموذج أمر بيع
+        function SalesOrderForm({ customers, products, onSubmit }) {
+            const [customerId, setCustomerId] = useState(customers[0]?.id || '');
+            const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || '');
+            const [qty, setQty] = useState(1);
+            const [orderItems, setOrderItems] = useState([]);
+
+            const handleAddItem = () => {
+                const product = products.find(p => p.id === selectedProductId);
+                if (!product) return;
+                
+                setOrderItems([...orderItems, {
+                    productId: product.id,
+                    name: product.name,
+                    price: product.price,
+                    qty: parseInt(qty)
+                }]);
+            };
+
+            const grandTotal = orderItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            return (
+                <div className="space-y-4 text-xs">
+                    <div>
+                        <label className="block font-bold text-slate-700 mb-1">اختيار حساب العميل</label>
+                        <select value={customerId} onChange={e => setCustomerId(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold">
+                            {customers.map(c => <option key={c.id} value={c.id}>{c.name} ({c.email})</option>)}
+                        </select>
+                    </div>
+
+                    {/* إضافة العناصر */}
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                        <span className="font-bold text-slate-700 block">إضافة عناصر للطلب</span>
+                        <div className="flex gap-2">
+                            <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)} className="flex-1 p-2 bg-white border border-slate-200 rounded-lg font-semibold">
+                                {products.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name} - ${p.price} (المتوفر: {p.stock})</option>
+                                ))}
+                            </select>
+                            <input type="number" min="1" value={qty} onChange={e => setQty(e.target.value)} className="w-20 p-2 bg-white border border-slate-200 rounded-lg text-center" />
+                            <button onClick={handleAddItem} className="px-4 bg-slate-800 text-white rounded-lg font-bold">إضافة</button>
+                        </div>
+                    </div>
+
+                    {/* ملخص البنود */}
+                    <div className="space-y-2">
+                        <span className="font-bold text-slate-700 block">ملخص بنود الفاتورة</span>
+                        {orderItems.map((item, idx) => (
+                            <div key={idx} className="flex justify-between items-center p-2.5 rounded-lg bg-slate-100 font-semibold">
+                                <span>{item.name} (عدد {item.qty})</span>
+                                <span className="font-bold">${(item.price * item.qty).toFixed(2)}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex justify-between items-center pt-3 border-t border-slate-200 text-sm font-extrabold">
+                        <span>الإجمالي الكلي:</span>
+                        <span className="text-indigo-600">${grandTotal.toFixed(2)}</span>
+                    </div>
+
+                    <button 
+                        disabled={orderItems.length === 0}
+                        onClick={() => onSubmit({ customerId, items: orderItems, total: grandTotal })} 
+                        className="w-full py-3 bg-indigo-600 disabled:opacity-50 text-white font-bold rounded-xl transition shadow-md shadow-indigo-100"
+                    >
+                        تأكيد وإصدار أمر البيع
                     </button>
                 </div>
-            `;
-            container.appendChild(div);
-        });
-        lucide.createIcons();
-    }
-
-    // إصلاح مشكلة الأيقونة عند النسخ التي كانت تؤدي للخطأ وتوقف الأيقونة
-    function copyToClipboard(btn, text) {
-        const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select();
-        try {
-            document.execCommand('copy');
-            btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
-            lucide.createIcons({root: btn});
-            btn.classList.add('text-emerald-600', 'bg-emerald-50');
-            
-            setTimeout(() => { 
-                btn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i>';
-                lucide.createIcons({root: btn});
-                btn.classList.remove('text-emerald-600', 'bg-emerald-50'); 
-            }, 2000);
-        } catch (e) {} 
-        document.body.removeChild(t);
-    }
-
-    function switchTab(tabId) {
-    activeTab = tabId;
-
-    ['main', 'athkar', 'qibla', 'duas', 'settings'].forEach(id => {
-        const section = document.getElementById(`tab-${id}`);
-        if (section) section.classList.add('hidden');
-
-        const btn = document.getElementById(`tab-${id}-btn`);
-        if (btn) {
-            btn.classList.remove('text-emerald-700');
-            btn.classList.add('text-slate-400');
-        }
-    });
-
-    const activeSection = document.getElementById(`tab-${tabId}`);
-    if (activeSection) activeSection.classList.remove('hidden');
-
-    const activeBtn = document.getElementById(`tab-${tabId}-btn`);
-    if (activeBtn) {
-        activeBtn.classList.add('text-emerald-700');
-        activeBtn.classList.remove('text-slate-400');
-    }
-
-    if (tabId === 'athkar') filterAthkar('morning');
-    else if (tabId === 'qibla') initQibla();
-    else if (tabId === 'duas') renderDuas('jawami');
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-    function updateTimesAndDates() {
-        const now = new Date();
-        document.getElementById('header-gregorian-date').textContent = now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        let j = Math.floor(now.getTime() / 86400000) + 2440588, l = j - 1948440 + 10632, n = Math.floor((l - 1) / 10631); l = l - 10631 * n + 354;
-        let j2 = Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719) + Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
-        l = l - Math.floor((30 - j2) / 15) * Math.floor((17719 * j2) / 50) - Math.floor(j2 / 16) * Math.floor((15238 * j2) / 43) + 29;
-        let m = Math.floor((24 * l) / 709), d = l - Math.floor((709 * m) / 24), y = 30 * n + j2 - 30;
-        const hM = ["محرّم", "صفر", "ربيع الأول", "ربيع الآخر", "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان", "رمضان", "شوّال", "ذو القعدة", "ذو الحجة"];
-        document.getElementById('header-hijri-date').textContent = `${d} ${hM[m - 1]} ${y} هـ`;
-    }
-
-    function setDailyHadith(random = false) {
-        let h;
-        if (random) {
-            h = hadithsList[Math.floor(Math.random() * hadithsList.length)];
-        } else {
-            h = hadithsList[new Date().getDate() % hadithsList.length];
-        }
-        document.getElementById('daily-hadith-text').textContent = `"${h.text}"`;
-        document.getElementById('daily-hadith-rawi').textContent = h.rawi;
-    }
-
-    // إضافة الدالة المفقودة بالكامل التي تتسبب في المشكلة عند ضغط زر "تحديث الحديث"
-    function fetchHadithFromDorar() {
-        const btn = document.getElementById('load-hadith-btn');
-        const originalHTML = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>تحديث من الدرر</span>`;
-        btn.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i><span>تم التحديث</span>`;
-        lucide.createIcons({ root: btn });
-        
-        // جلب حديث عشوائي من القائمة المحلية لمحاكاة التحديث
-        setDailyHadith(true);
-        playBeep();
-
-        setTimeout(() => {
-            btn.innerHTML = originalHTML;
-            lucide.createIcons({ root: btn });
-        }, 2000);
-    }
-
-    let trackerState = { fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false };
-    function initTracker() { if(localStorage.getItem('prayer_tracker')) trackerState = JSON.parse(localStorage.getItem('prayer_tracker')); updateTrackerUI(); }
-    function toggleTrack(k) { trackerState[k] = !trackerState[k]; localStorage.setItem('prayer_tracker', JSON.stringify(trackerState)); updateTrackerUI(); playBeep(); }
-    function updateTrackerUI() {
-        let count = 0;
-        prayerKeysList.forEach(k => {
-            const b = document.getElementById(`track-${k}`), i = document.getElementById(`track-icon-${k}`);
-            if(trackerState[k]) { count++; b.className = "flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50/40 transition scale-[1.03]"; i.className = "w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center border-0 text-white shadow-sm"; }
-            else { b.className = "flex flex-col items-center justify-center p-3 rounded-2xl border border-slate-100 transition"; i.className = "w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-400"; }
-        });
-        document.getElementById('tracker-percentage').textContent = `${Math.round((count/5)*100)}% مكتمل`;
-    }
-
-    let fastingReminders = { 'mon-thu': true, 'white': true };
-    function initFastingReminders() { if(localStorage.getItem('fast')) fastingReminders = JSON.parse(localStorage.getItem('fast')); updateFastingUI(); }
-    function toggleFastingReminder(t) { fastingReminders[t] = !fastingReminders[t]; localStorage.setItem('fast', JSON.stringify(fastingReminders)); updateFastingUI(); playBeep(); }
-    function updateFastingUI() {
-        ['mon-thu', 'white'].forEach(t => {
-            const b = document.getElementById(`btn-toggle-fast-${t}`), c = document.getElementById(`toggle-circle-${t}`);
-            if(fastingReminders[t]) { b.classList.replace('bg-slate-300', 'bg-emerald-600'); c.classList.replace('translate-x-0', 'translate-x-5'); }
-            else { b.classList.replace('bg-emerald-600', 'bg-slate-300'); c.classList.replace('translate-x-5', 'translate-x-0'); }
-        });
-    }
-
-    function showCustomModal(title, body, cb = null) {
-        document.getElementById('notif-modal-title').textContent = title;
-        document.getElementById('notif-modal-body').textContent = body;
-        document.getElementById('custom-notification-modal').classList.remove('hidden'); 
-        modalActionCallback = cb;
-    }
-
-    function closeNotificationModal() { 
-        document.getElementById('custom-notification-modal').classList.add('hidden'); 
-        stopAdhanAudio(); 
-    }
-
-    
-    function stopAdhanAudio() {
-        // ✅ إيقاف الصوت
-        if (currentAdhanAudio) {
-            currentAdhanAudio.pause();
-            currentAdhanAudio.currentTime = 0;
-            currentAdhanAudio = null;
+            );
         }
 
-        // ✅ إغلاق المودال
-        document.getElementById('custom-notification-modal').classList.add('hidden');
-    }
+        // نموذج أمر شراء
+        function PurchaseOrderForm({ warehouses, products, onSubmit }) {
+            const [supplier, setSupplier] = useState('');
+            const [warehouseId, setWarehouseId] = useState(warehouses[0]?.id || '');
+            const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || '');
+            const [qty, setQty] = useState(10);
+            const [receiveNow, setReceiveNow] = useState(true);
 
+            const selectedProduct = products.find(p => p.id === selectedProductId);
+            const total = selectedProduct ? selectedProduct.cost * qty : 0;
 
-    function playBeep() { 
-        let b = document.getElementById('beep-player'); 
-        if(b) { 
-            b.currentTime = 0; 
-            b.volume = 0.5; 
-            b.play().catch(()=>{}); 
-        } 
-    }
-    
-    function initQibla() {
-        calculateQiblaAngleDegrees(userLatitude, userLongitude);
-        if (window.DeviceOrientationEvent) { window.addEventListener('deviceorientation', handleOrientation, true); }
-        else document.getElementById('qibla-sensor-message').textContent = "التوجيه التلقائي غير مدعوم، استخدم المؤشر.";
-    }
+            return (
+                <div className="space-y-4 text-xs">
+                    <div>
+                        <label className="block font-bold text-slate-700 mb-1">اسم المورد / الشركة التابعة</label>
+                        <input type="text" required placeholder="مثال: شركة التجهيزات الصناعية" value={supplier} onChange={e => setSupplier(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+                    </div>
 
-    function handleOrientation(e) {
-        let heading = e.webkitCompassHeading || Math.abs(e.alpha - 360);
-        if (heading) {
-            document.getElementById('compass-disc').style.transform = `rotate(${-heading}deg)`;
-            let rel = calculatedQiblaAngle - heading;
-            document.getElementById('main-qibla-arrow').style.transform = `rotate(${rel}deg)`;
+                    <div>
+                        <label className="block font-bold text-slate-700 mb-1">المستودع المستلم</label>
+                        <select value={warehouseId} onChange={e => setWarehouseId(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold">
+                            {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">المنتج المراد شراؤه</label>
+                            <select value={selectedProductId} onChange={e => setSelectedProductId(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold">
+                                {products.map(p => <option key={p.id} value={p.id}>{p.name} (${p.cost})</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">الكمية المطلوب توريدها</label>
+                            <input type="number" min="1" value={qty} onChange={e => setQty(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 py-2">
+                        <input type="checkbox" id="recNow" checked={receiveNow} onChange={e => setReceiveNow(e.target.checked)} className="rounded text-indigo-600 focus:ring-0" />
+                        <label htmlFor="recNow" className="text-slate-700 font-bold">إيداع الكمية في المستودع فوراً عند الحفظ</label>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-3 border-t text-sm font-extrabold">
+                        <span>إجمالي التكلفة:</span>
+                        <span className="text-emerald-600">${total.toFixed(2)}</span>
+                    </div>
+
+                    <button 
+                        disabled={!supplier}
+                        onClick={() => onSubmit({
+                            supplier,
+                            warehouseId,
+                            items: [{ productId: selectedProductId, qty: parseInt(qty), cost: selectedProduct.cost }],
+                            total,
+                            receiveNow
+                        })} 
+                        className="w-full py-3 bg-indigo-600 disabled:opacity-50 text-white font-bold rounded-xl transition shadow-md shadow-indigo-100"
+                    >
+                        حفظ وإصدار أمر الشراء
+                    </button>
+                </div>
+            );
         }
-    }
 
-    function handleManualCompassRotate(v) {
-        document.getElementById('manual-angle-text').textContent = `${v}°`;
-        document.getElementById('compass-disc').style.transform = `rotate(${-v}deg)`;
-        document.getElementById('main-qibla-arrow').style.transform = `rotate(${calculatedQiblaAngle - v}deg)`;
-    }
-  </script>
+        // نموذج مناقلة بين المستودعات
+        function StockTransferForm({ warehouses, products, onSubmit }) {
+            const [productId, setProductId] = useState(products[0]?.id || '');
+            const [fromWh, setFromWh] = useState(warehouses[0]?.id || '');
+            const [toWh, setToWh] = useState(warehouses[1]?.id || warehouses[0]?.id || '');
+            const [qty, setQty] = useState(1);
+
+            return (
+                <div className="space-y-4 text-xs">
+                    <div>
+                        <label className="block font-bold text-slate-700 mb-1">المنتج المراد نقل شحنته</label>
+                        <select value={productId} onChange={e => setProductId(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold">
+                            {products.map(p => <option key={p.id} value={p.id}>{p.name} (المتوفر: {p.stock})</option>)}
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">من مستودع</label>
+                            <select value={fromWh} onChange={e => setFromWh(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold">
+                                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block font-bold text-slate-700 mb-1">إلى مستودع</label>
+                            <select value={toWh} onChange={e => setToWh(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold">
+                                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block font-bold text-slate-700 mb-1">الكمية المنقولة</label>
+                        <input type="number" min="1" value={qty} onChange={e => setQty(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
+                    </div>
+
+                    <button 
+                        onClick={() => onSubmit({ productId, fromWarehouseId: fromWh, toWarehouseId: toWh, qty })}
+                        className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl transition shadow-md shadow-indigo-100"
+                    >
+                        تنفيذ عملية المناقلة
+                    </button>
+                </div>
+            );
+        }
+
+        function KpiCard({ title, value, icon, color, subText }) {
+            const colorClasses = {
+                indigo: 'bg-indigo-50 text-indigo-600',
+                emerald: 'bg-emerald-50 text-emerald-600',
+                amber: 'bg-amber-50 text-amber-600',
+                sky: 'bg-sky-50 text-sky-600'
+            };
+
+            return (
+                <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div className="flex justify-between items-start mb-3">
+                        <div>
+                            <span className="text-xs font-bold text-slate-500 block mb-1">{title}</span>
+                            <span className="text-xl font-black text-slate-900">{value}</span>
+                        </div>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${colorClasses[color]}`}>
+                            <i className={`fa-solid ${icon} text-lg`}></i>
+                        </div>
+                    </div>
+                    <p className="text-[10px] font-semibold text-slate-400 border-t border-slate-100 pt-2">{subText}</p>
+                </div>
+            );
+        }
+
+        function StatusBadge({ status }) {
+            const styles = {
+                'مكتمل': 'bg-emerald-100 text-emerald-800',
+                'تم الاستلام': 'bg-emerald-100 text-emerald-800',
+                'قيد المعالجة': 'bg-indigo-100 text-indigo-800',
+                'معلق': 'bg-amber-100 text-amber-800',
+                'نشط': 'bg-emerald-100 text-emerald-800'
+            };
+
+            return (
+                <span className={`px-2.5 py-1 rounded-full font-bold text-[10px] inline-block ${styles[status] || 'bg-slate-100 text-slate-700'}`}>
+                    {status}
+                </span>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
